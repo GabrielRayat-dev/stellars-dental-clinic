@@ -16,3 +16,4 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 module.exports = { supabase, supabaseAdmin };
+

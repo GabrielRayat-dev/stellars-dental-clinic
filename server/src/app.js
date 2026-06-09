@@ -14,6 +14,9 @@ const adminRoutes = require('./routes/admin.routes');
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 
+const appointmentRoutes = require('./routes/appointment.routes');
+app.use('/api/appointments', appointmentRoutes);
+
 // Test route
 app.get('/', (req, res) => {
   res.json({ message: 'Stellars Dental API is running' });
