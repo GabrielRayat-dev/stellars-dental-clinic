@@ -141,15 +141,44 @@ const deleteDiagnosisRecord = async (req, res) => {
 const addPatientImage = async (req, res) => {
   try {
     const { id } = req.params;
-    const { file_url, file_name } = req.body;
 
-    if (!file_url || !file_name) {
-      return res.status(400).json({ message: 'File URL and file name are required' });
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    const data = await patientModel.addPatientImage(id, file_url, file_name, req.profile.id);
+    const file = req.file;
+    const fileExt = file.originalname.split('.').pop();
+    const fileName = `${id}/${Date.now()}.${fileExt}`;
+
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabaseAdmin
+      .storage
+      .from('patient-image')
+      .upload(fileName, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      return res.status(500).json({ message: uploadError.message });
+    }
+
+    // Get the file URL
+    const { data: urlData } = supabaseAdmin
+      .storage
+      .from('patient-image')
+      .getPublicUrl(fileName);
+
+    // Save to database
+    const data = await patientModel.addPatientImage(
+      id,
+      urlData.publicUrl,
+      file.originalname,
+      req.profile.id
+    );
+
     res.status(201).json({
-      message: 'Image added successfully',
+      message: 'Image uploaded successfully',
       data,
     });
   } catch (error) {

@@ -6,7 +6,13 @@ const app = express();
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
+// app.use(express.json());
+app.use((req, res, next) => {
+  if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+    return next();
+  }
+  express.json()(req, res, next);
+});
 
 // Routes
 const authRoutes = require('./routes/auth.routes');
