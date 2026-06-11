@@ -1,4 +1,4 @@
-const { supabase } = require('../config/supabase');
+const { supabase, supabaseAdmin } = require('../config/supabase');
 
 const authenticate = async (req, res, next) => {
   try {
@@ -16,7 +16,8 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({ message: 'Unauthorized: Invalid token' });
     }
 
-    const { data: profile, error: profileError } = await supabase
+    // Use supabaseAdmin to bypass RLS for profile lookup
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('*')
       .eq('user_id', user.id)

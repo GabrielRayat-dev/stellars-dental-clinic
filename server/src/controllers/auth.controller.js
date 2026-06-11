@@ -18,7 +18,8 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const { data: profile, error: profileError } = await supabase
+    // Use supabaseAdmin to bypass RLS for profile lookup
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('*')
       .eq('user_id', data.user.id)
