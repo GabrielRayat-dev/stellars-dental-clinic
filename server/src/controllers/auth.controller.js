@@ -21,6 +21,7 @@ const login = async (req, res) => {
     // Use supabaseAdmin to bypass RLS for profile lookup
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
+      .update({ status: 'logged_in' })
       .select('*')
       .eq('user_id', data.user.id)
       .single();
@@ -39,6 +40,7 @@ const login = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 const changePassword = async (req, res) => {
   try {
@@ -79,6 +81,24 @@ const changePassword = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
+    // Get the user before signing out
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // Update profile status to logged_out
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .update({ status: 'logged_out' })
+      .eq('user_id', user.id);
+
+    if (profileError) {
+      return res.status(500).json({ message: 'Error updating profile status' });
+    }
+
+    // Now sign out from Supabase auth
     const { error } = await supabase.auth.signOut();
 
     if (error) {
