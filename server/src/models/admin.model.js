@@ -64,10 +64,11 @@ const updateStaff = async (id, profileData) => {
 };
 
 const deleteStaff = async (id) => {
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
     .select('user_id')
     .eq('id', id)
+    .single();
 
   if (profileError) throw profileError;
 
@@ -78,6 +79,8 @@ const deleteStaff = async (id) => {
   if (authError) throw authError;
   return { message: 'Staff deleted successfully' };
 };
+
+
 
 module.exports = {
   getAllStaff,
