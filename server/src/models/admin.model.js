@@ -1,10 +1,10 @@
 const { supabase, supabaseAdmin } = require('../config/supabase');
 
 const getAllStaff = async () => {
-  const { data, error } = await supabase
-    .from('profiles')
+  const { data, error } = await supabaseAdmin  // use supabaseAdmin to bypass RLS
+    .from('staff_with_email')
     .select('*')
-    .in('role', ['dentist', 'assistant'])
+    .in('role', ['dentist', 'assistant', 'admin'])
     .order('created_at', { ascending: false });
 
   if (error) throw error;
@@ -12,8 +12,8 @@ const getAllStaff = async () => {
 };
 
 const getStaffById = async (id) => {
-  const { data, error } = await supabase
-    .from('profiles')
+  const { data, error } = await supabaseAdmin
+    .from('staff_with_email')
     .select('*')
     .eq('id', id)
     .single();
@@ -50,7 +50,7 @@ const createStaff = async (email, password, profileData) => {
 };
 
 const updateStaff = async (id, profileData) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin  // ✅ use supabaseAdmin to bypass RLS
     .from('profiles')
     .update({
       ...profileData,
@@ -72,6 +72,8 @@ const deleteStaff = async (id) => {
 
   if (profileError) throw profileError;
 
+  // ✅ Deleting from auth.users will cascade to profiles automatically
+  // as long as your profiles table has ON DELETE CASCADE on user_id FK
   const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(
     profile.user_id
   );

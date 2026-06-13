@@ -55,7 +55,7 @@ const AdminUsers = () => {
   const [showDelete, setShowDelete] = useState(false);
 
   // Form state
-  const emptyForm = { name: '', email: '', password: '', role: 'assistant', phone_number: '', receive_emails: false, is_active: true };
+  const emptyForm = { name: '', email: '', password: '', role: 'assistant', phone_number: '', receive_emails: false, status: true };
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
@@ -123,7 +123,7 @@ const AdminUsers = () => {
       role: selectedUser.role || 'assistant',
       phone_number: selectedUser.phone_number || '',
       receive_emails: selectedUser.receive_emails || false,
-      is_active: selectedUser.is_active ?? true,
+      status: selectedUser.status ?? true,
     });
     setFormError('');
     setShowEdit(true);
@@ -131,7 +131,7 @@ const AdminUsers = () => {
   const submitEdit = async (e) => {
     e.preventDefault();
     setSubmitting(true); setFormError('');
-    const payload = { name: form.name, role: form.role, phone_number: form.phone_number, receive_emails: form.receive_emails, is_active: form.is_active };
+    const payload = { name: form.name, role: form.role, phone_number: form.phone_number, receive_emails: form.receive_emails, status: form.status };
     try {
       const res = await fetch(`/api/admin/staff/${selectedId}`, {
         method: 'PUT',
@@ -233,9 +233,9 @@ const AdminUsers = () => {
                       <span className={`au-checkbox-dot ${u.receive_emails ? 'au-checkbox-dot--on' : ''}`} />
                     </td>
                     <td>
-                      <span className={`au-badge ${u.is_active ? 'au-badge--active' : 'au-badge--inactive'}`}>
+                      <span className={`au-badge ${u.status ? 'au-badge--active' : 'au-badge--inactive'}`}>
                         <span className="au-badge__dot" />
-                        {u.is_active ? 'active' : 'not active'}
+                        {u.status ? 'active' : 'not active'}
                       </span>
                     </td>
                   </tr>
@@ -302,7 +302,7 @@ const AdminUsers = () => {
                 <span className="au-toggle__label">Receive email notifications</span>
               </label>
               <label className="au-toggle">
-                <input type="checkbox" name="is_active" checked={form.is_active} onChange={handleField} />
+                <input type="checkbox" name="status" checked={form.status} onChange={handleField} />
                 <span className="au-toggle__track" />
                 <span className="au-toggle__label">Active account</span>
               </label>
@@ -343,7 +343,7 @@ const AdminUsers = () => {
                 <span className="au-toggle__label">Receive email notifications</span>
               </label>
               <label className="au-toggle">
-                <input type="checkbox" name="is_active" checked={form.is_active} onChange={handleField} />
+                <input type="checkbox" name="status" checked={form.status} onChange={handleField} />
                 <span className="au-toggle__track" />
                 <span className="au-toggle__label">Active account</span>
               </label>
