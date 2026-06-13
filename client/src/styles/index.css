@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Colors */
+  --primary-green: #3d7655;
+  --primary-green-hover: #2d5a3f;
+  --primary-green-light: #edf5f1;
+  --gold-accent: #d4af37;
+  --gold-accent-hover: #aa8c2c;
+  --bg-mint: #f0f7f4;
+  --card-bg: #ffffff;
+  --text-dark: #1f3a2b;
+  --text-muted: #5a7d68;
+  --border-green: #3d7655;
+  --border-light: #d1e2d9;
+  --input-focus: #2d5a3f;
+  --error-red: #d9534f;
+  
+  /* Fonts */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Transitions */
+  --transition-fast: all 0.2s ease-in-out;
+  --transition-normal: all 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-mint);
+  color: var(--text-dark);
+  min-height: 100vh;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* Tooth/Wheel repeating subtle background pattern */
+.bg-pattern {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: var(--bg-mint);
+  background-image: 
+    radial-gradient(var(--border-light) 0.5px, transparent 0.5px), 
+    radial-gradient(var(--border-light) 0.5px, var(--bg-mint) 0.5px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  opacity: 0.65;
+}
+
+/* Let's also build a custom CSS pattern resembling teeth or circles for the mockup feel */
+.bg-dental-pattern {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: #f1f7f4;
+  background-image: 
+    radial-gradient(circle at 50% 50%, transparent 9%, rgba(61, 118, 85, 0.03) 10%, rgba(61, 118, 85, 0.03) 12%, transparent 13%),
+    radial-gradient(circle at 0 0, transparent 9%, rgba(61, 118, 85, 0.03) 10%, rgba(61, 118, 85, 0.03) 12%, transparent 13%),
+    radial-gradient(circle at 100% 0, transparent 9%, rgba(61, 118, 85, 0.03) 10%, rgba(61, 118, 85, 0.03) 12%, transparent 13%),
+    radial-gradient(circle at 100% 100%, transparent 9%, rgba(61, 118, 85, 0.03) 10%, rgba(61, 118, 85, 0.03) 12%, transparent 13%),
+    radial-gradient(circle at 0 100%, transparent 9%, rgba(61, 118, 85, 0.03) 10%, rgba(61, 118, 85, 0.03) 12%, transparent 13%);
+  background-size: 40px 40px;
+  opacity: 0.9;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
