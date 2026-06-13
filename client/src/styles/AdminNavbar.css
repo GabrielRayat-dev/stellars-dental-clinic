@@ -1,0 +1,235 @@
+/* ─────────────────────────────────────────────
+   Admin Navbar  —  sharp corners, Playfair
+   ───────────────────────────────────────────── */
+
+.admin-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5%;
+  height: 60px;
+  background-color: #ffffff;
+  border-bottom: 2px solid var(--primary-green);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  font-family: var(--font-serif);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Brand ───────────────────────────────────── */
+.admin-navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.admin-navbar__logo {
+  height: 36px;
+  width: 36px;
+  border-radius: 0;
+  object-fit: contain;
+  border: 2px solid var(--border-light);
+}
+
+.admin-navbar__brand-text {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-green);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ── Nav Links ───────────────────────────────── */
+.admin-navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-navbar__link {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: 0.875rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  position: relative;
+  white-space: nowrap;
+}
+
+.admin-navbar__link-icon {
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: var(--transition-fast);
+}
+
+.admin-navbar__link:hover {
+  color: var(--primary-green);
+  background-color: var(--primary-green-light);
+}
+
+.admin-navbar__link:hover .admin-navbar__link-icon {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+/* Active state */
+.admin-navbar__link--active {
+  color: var(--primary-green);
+  font-weight: 700;
+  background-color: var(--primary-green-light);
+}
+
+.admin-navbar__link--active .admin-navbar__link-icon {
+  opacity: 1;
+  color: var(--primary-green);
+}
+
+/* Active underline indicator */
+.admin-navbar__link-indicator {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--primary-green);
+  border-radius: 0;
+  animation: slideIn 0.2s ease forwards;
+}
+
+@keyframes slideIn {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ── Profile ─────────────────────────────────── */
+.admin-navbar__profile {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0;
+  border: 1px solid var(--border-light);
+  transition: var(--transition-fast);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.admin-navbar__profile:hover {
+  background-color: var(--primary-green-light);
+  border-color: var(--primary-green);
+}
+
+.admin-navbar__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 0;
+  background-color: var(--primary-green);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  font-family: var(--font-serif);
+}
+
+.admin-navbar__profile-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.admin-navbar__profile-name {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-serif);
+}
+
+.admin-navbar__profile-role {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font-serif);
+}
+
+.admin-navbar__chevron {
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+/* ── Dropdown — click-toggled via React state ── */
+.admin-navbar__dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 0;
+  border-top: 2px solid var(--primary-green);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  min-width: 150px;
+  overflow: hidden;
+  z-index: 200;
+  animation: dropDown 0.15s ease forwards;
+}
+
+@keyframes dropDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Open state driven by React — profile border highlights */
+.admin-navbar__profile--open {
+  background-color: var(--primary-green-light);
+  border-color: var(--primary-green);
+}
+
+/* Chevron flips when open */
+.admin-navbar__chevron--open {
+  transform: rotate(180deg);
+}
+
+.admin-navbar__dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--error-red);
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.admin-navbar__dropdown-item:hover {
+  background-color: #fdf0f0;
+}
