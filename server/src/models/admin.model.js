@@ -44,7 +44,6 @@ const createStaff = async (email, password, profileData) => {
     })
     .eq('user_id', authData.user.id)
     .select()
-    .single();
 
   if (error) throw error;
   return data;
@@ -59,7 +58,6 @@ const updateStaff = async (id, profileData) => {
     })
     .eq('id', id)
     .select()
-    .single();
 
   if (error) throw error;
   return data;
@@ -70,7 +68,6 @@ const deleteStaff = async (id) => {
     .from('profiles')
     .select('user_id')
     .eq('id', id)
-    .single();
 
   if (profileError) throw profileError;
 
