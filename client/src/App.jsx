@@ -2,12 +2,16 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminLayout from './components/AdminLayout';
 
 // Pages
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import DashboardRedirect from './pages/DashboardRedirect';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminUsers from './pages/AdminUsers';
+import AdminLogs from './pages/AdminLogs';
+import AdminSettings from './pages/AdminSettings';
 import DentistDashboard from './pages/DentistDashboard';
 import AssistantDashboard from './pages/AssistantDashboard';
 
@@ -29,15 +33,21 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
+
+          {/* Admin Routes — nested under AdminLayout so navbar persists */}
           <Route
             path="/dashboard/admin"
             element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <AdminDashboard />
+                <AdminLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="logs" element={<AdminLogs />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
 
           <Route
             path="/dashboard/dentist"
