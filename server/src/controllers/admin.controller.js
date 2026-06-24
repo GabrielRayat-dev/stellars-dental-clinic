@@ -79,6 +79,12 @@ const updateStaff = async (req, res) => {
 const deleteStaff = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Prevent admin from deleting themselves
+    if (id === req.profile.id) {
+      return res.status(400).json({ message: 'Admin cannot delete itself' });
+    }
+
     const data = await adminModel.deleteStaff(id);
     res.status(200).json(data);
   } catch (error) {
