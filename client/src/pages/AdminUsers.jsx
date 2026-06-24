@@ -13,24 +13,12 @@ import {
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import AdminPagination from '../components/AdminPagination';
+import Modal from '../components/Modal';
 import '../styles/AdminUsers.css';
 
 const ROWS_PER_PAGE = 8;
 
 const ROLE_LABELS = { admin: 'Admin', dentist: 'Dentist', assistant: 'Assistant' };
-
-/* ─── Modal ─────────────────────────────────── */
-const Modal = ({ title, onClose, children }) => (
-  <div className="au-modal-overlay" onClick={onClose}>
-    <div className="au-modal" onClick={(e) => e.stopPropagation()}>
-      <div className="au-modal__header">
-        <h2 className="au-modal__title">{title}</h2>
-        <button className="au-modal__close" onClick={onClose}><X size={18} /></button>
-      </div>
-      {children}
-    </div>
-  </div>
-);
 
 /* ─── Field ──────────────────────────────────── */
 const Field = ({ label, required, children }) => (

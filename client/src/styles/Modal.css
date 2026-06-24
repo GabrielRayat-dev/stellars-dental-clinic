@@ -1,0 +1,65 @@
+/* ── Modal Component ───────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 58, 43, 0.35);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeOverlay 0.2s ease;
+}
+
+@keyframes fadeOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 0;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideModal 0.2s ease;
+  border-top: 3px solid var(--primary-green);
+}
+
+@keyframes slideModal {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.modal__title {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  color: var(--primary-green);
+  margin: 0;
+}
+
+.modal__close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  border-radius: 0;
+  padding: 4px;
+  transition: var(--transition-fast);
+}
+.modal__close:hover {
+  background: var(--primary-green-light);
+  color: var(--primary-green);
+}
