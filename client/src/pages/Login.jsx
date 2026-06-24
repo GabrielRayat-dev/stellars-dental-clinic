@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/Navbar';
 import FormInput from '../components/FormInput';
 import Button from '../components/Button';
 import '../styles/Login.css';
@@ -40,13 +39,14 @@ const Login = () => {
 
   return (
     <div className="login-page-container">
-      <Navbar />
-
       {/* Repeating mint dental pattern background */}
       <div className="bg-dental-pattern" />
 
       {/* Main Container */}
       <main className="login-main">
+
+
+
         {/* Login Card */}
         <div className="login-card animate-fade-in">
           {/* Header */}
@@ -102,11 +102,6 @@ const Login = () => {
           </form>
         </div>
       </main>
-
-      {/* Footer Text Matching Mockup */}
-      <footer className="login-footer">
-        Not too sure what to put here lmao
-      </footer>
     </div>
   );
 };

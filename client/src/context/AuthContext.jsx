@@ -8,13 +8,25 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user session already exists in localStorage
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     
     if (savedToken && savedUser) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
+      
+      // Fetch latest profile to ensure name updates are reflected
+      fetch('/api/auth/profile', {
+        headers: { Authorization: `Bearer ${savedToken}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.data) {
+          setUser(data.data);
+          localStorage.setItem('user', JSON.stringify(data.data));
+        }
+      })
+      .catch(err => console.error('Failed to refresh profile', err));
     }
     setLoading(false);
   }, []);

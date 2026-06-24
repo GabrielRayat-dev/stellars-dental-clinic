@@ -1,0 +1,23 @@
+/* ─────────────────────────────────────────────
+   Footer  —  sharp corners, Playfair
+   ───────────────────────────────────────────── */
+
+.footer {
+  width: 100%;
+  padding: 1.5rem 0;
+  background-color: #ffffff;
+  border-top: 2px solid var(--primary-green);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: auto; /* Pushes footer to the bottom if container is flex col */
+}
+
+.footer__text {
+  font-family: var(--font-serif);
+  color: var(--primary-green);
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin: 0;
+  text-align: center;
+}

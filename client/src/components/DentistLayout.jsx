@@ -1,12 +1,12 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import AdminNavbar from './AdminNavbar';
+import DentistNavbar from './DentistNavbar';
 import Footer from './Footer';
 
-const AdminLayout = () => {
+const DentistLayout = () => {
   return (
     <div className="dashboard-container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AdminNavbar />
+      <DentistNavbar />
       <div className="bg-dental-pattern" />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Outlet />
@@ -16,4 +16,4 @@ const AdminLayout = () => {
   );
 };
 
-export default AdminLayout;
+export default DentistLayout;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   UserPlus,
   UserPen,
@@ -10,6 +11,8 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import Header from '../components/Header';
+import AdminPagination from '../components/AdminPagination';
 import '../styles/AdminUsers.css';
 
 const ROWS_PER_PAGE = 8;
@@ -39,6 +42,7 @@ const Field = ({ label, required, children }) => (
 
 /* ─── Main Component ─────────────────────────── */
 const AdminUsers = () => {
+  const navigate = useNavigate();
   const { token, user: currentUser } = useAuth();
 
   const [users, setUsers] = useState([]);
@@ -167,12 +171,12 @@ const AdminUsers = () => {
   return (
     <main className="au-page">
       {/* Header */}
-      <div className="au-header">
-        <div>
-          <h1 className="au-header__title">User Management</h1>
-          <p className="au-header__subtitle">Create, update, deactivate, delete users</p>
-        </div>
-      </div>
+      <Header 
+        title="User Management" 
+        subtitle="create, update, deactivate, delete users"
+        onBack={() => navigate('/dashboard/admin')}
+        onForward={() => navigate('/dashboard/admin/logs')}
+      />
 
       {/* Action Buttons */}
       <div className="au-actions">
@@ -244,31 +248,18 @@ const AdminUsers = () => {
             </tbody>
           </table>
         )}
-      </div>
 
-      {/* Pagination */}
-      {!loading && !error && users.length > 0 && (
-        <div className="au-pagination">
-          <span className="au-pagination__count">{users.length} users</span>
-          <div className="au-pagination__controls">
-            <button
-              className="au-pagination__btn"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              <ChevronLeft size={14} />
-            </button>
-            <span className="au-pagination__info">{page} / {totalPages}</span>
-            <button
-              className="au-pagination__btn"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-            >
-              <ChevronRight size={14} />
-            </button>
-          </div>
-        </div>
-      )}
+        {/* Pagination inside table wrapper */}
+        {!loading && !error && users.length > 0 && (
+          <AdminPagination 
+            totalItems={users.length} 
+            itemName="users"
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        )}
+      </div>
 
       {/* ── ADD MODAL ───────────────────────── */}
       {showAdd && (

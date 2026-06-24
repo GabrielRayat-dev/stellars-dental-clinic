@@ -34,7 +34,10 @@ const login = async (req, res) => {
       message: 'Login successful',
       token: data.session.access_token,
       must_change_password: profile.must_change_password,
-      profile,
+      profile: {
+        ...profile,
+        email: data.user.email
+      },
     });
   } catch (error) {
     res.status(500).json({ message: 'Internal server error' });
@@ -115,7 +118,10 @@ const getProfile = async (req, res) => {
   try {
     res.status(200).json({
       message: 'Profile retrieved successfully',
-      data: req.profile,
+      data: {
+        ...req.profile,
+        email: req.user.email
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

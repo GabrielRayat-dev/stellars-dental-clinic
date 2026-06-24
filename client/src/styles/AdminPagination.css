@@ -1,0 +1,63 @@
+/* ─────────────────────────────────────────────
+   Admin Pagination  —  sharp corners, Playfair
+   ───────────────────────────────────────────── */
+
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Align right as per image */
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.85rem;
+  font-family: var(--font-serif);
+  color: var(--primary-green);
+  border-top: 1px solid var(--border-light);
+  background-color: #f7faf8; /* Slight green tint at bottom of table if needed, or white */
+}
+
+.admin-pagination__count {
+  font-weight: 500;
+}
+
+.admin-pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-pagination__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%; /* Circle buttons */
+  background-color: var(--primary-green);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  padding: 0;
+}
+
+.admin-pagination__btn:hover:not(:disabled) {
+  background-color: var(--primary-green-hover);
+  transform: scale(1.05);
+}
+
+.admin-pagination__btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.admin-pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: #a8c4b5;
+}
+
+.admin-pagination__info {
+  font-weight: 600;
+  min-width: 35px;
+  text-align: center;
+  color: var(--primary-green);
+}

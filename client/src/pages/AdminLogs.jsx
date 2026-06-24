@@ -1,15 +1,14 @@
 import React from 'react';
 import { ClipboardList } from 'lucide-react';
+import Header from '../components/Header';
 import '../styles/Dashboard.css';
 
 const AdminLogs = () => (
   <main className="dashboard-main">
-    <div className="dashboard-welcome-banner">
-      <h1 className="dashboard-title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-        <ClipboardList size={28} /> Logs
-      </h1>
-      <p className="dashboard-subtitle">View system and activity logs.</p>
-    </div>
+    <Header 
+      title={<><ClipboardList size={28} /> Logs</>}
+      subtitle="View system and activity logs."
+    />
   </main>
 );
 

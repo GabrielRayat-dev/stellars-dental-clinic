@@ -1,0 +1,59 @@
+/* ─────────────────────────────────────────────
+   Admin Header  —  sharp layout, Playfair
+   ───────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.header__nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%; /* Circle as requested */
+  background-color: var(--primary-green);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.header__nav-btn:hover {
+  background-color: var(--primary-green-hover);
+  transform: scale(1.05);
+}
+
+.header__nav-btn:active {
+  transform: scale(0.95);
+}
+
+.header__text {
+  text-align: left;
+  flex-grow: 1;
+  padding: 0 1.5rem;
+}
+
+.header__title { display: flex; align-items: center; gap: 0.6rem;
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--primary-green);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.header__subtitle {
+  color: var(--primary-green);
+  font-size: 1rem;
+  margin-top: 0.2rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  opacity: 0.9;
+}
