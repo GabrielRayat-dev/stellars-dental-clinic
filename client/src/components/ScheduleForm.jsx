@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import Modal from './Modal';
+import ModalConfirmation from './ModalConfirmation';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ScheduleForm.css';
 
@@ -24,16 +25,13 @@ const ScheduleForm = ({ onSuccess }) => {
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Date/Time Selection
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [tempDate, setTempDate] = useState(null);
   const dateScrollRef = useRef(null);
 
-  // Drag to scroll logic
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
 
   // Generate 90 days starting from today (no past dates)
   const datesList = useMemo(() => {
@@ -111,19 +109,118 @@ const ScheduleForm = ({ onSuccess }) => {
     }
   };
 
-  const onMouseDown = (e) => {
-    setIsDragging(true);
-    setStartX(e.pageX - dateScrollRef.current.offsetLeft);
-    setScrollLeft(dateScrollRef.current.scrollLeft);
+  const scrollToDate = (dateObj, smooth = true) => {
+    if (!dateScrollRef.current) return;
+    const container = dateScrollRef.current;
+    const targetDate = formatDateForBackend(dateObj);
+    const targetEl = Array.from(container.children).find(
+      (el) => el.getAttribute('data-date') === targetDate
+    );
+    if (targetEl) {
+      container.scroll({
+        left: targetEl.offsetLeft - container.offsetLeft,
+        behavior: smooth ? 'smooth' : 'auto',
+      });
+    }
   };
-  const onMouseLeave = () => setIsDragging(false);
-  const onMouseUp = () => setIsDragging(false);
-  const onMouseMove = (e) => {
-    if (!isDragging) return;
+
+  const scrollToToday = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    scrollToDate(today, true);
+    const todayMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    setCurrentMonthDate(todayMonth);
+  };
+
+  // Ref-based mouse drag with momentum/inertia
+  const dragState = useRef({
+    active: false,
+    startX: 0,
+    scrollLeft: 0,
+    moved: false,
+    velX: 0,          // current velocity (px/ms)
+    lastX: 0,
+    lastTime: 0,
+    rafId: null,      // animation frame id for momentum
+  });
+
+  const stopMomentum = () => {
+    if (dragState.current.rafId) {
+      cancelAnimationFrame(dragState.current.rafId);
+      dragState.current.rafId = null;
+    }
+  };
+
+  const applyMomentum = () => {
+    const ds = dragState.current;
+    const el = dateScrollRef.current;
+    if (!el || Math.abs(ds.velX) < 0.3) {
+      stopMomentum();
+      return;
+    }
+    el.scrollLeft += ds.velX * 16; // 16ms ≈ one frame
+    ds.velX *= 0.92;               // friction — higher = slides longer
+    ds.rafId = requestAnimationFrame(applyMomentum);
+  };
+
+  const onMouseDown = (e) => {
+    if (e.button !== 0) return;
+    stopMomentum();
+    const ds = dragState.current;
+    ds.active    = true;
+    ds.moved     = false;
+    ds.startX    = e.pageX;
+    ds.lastX     = e.pageX;
+    ds.lastTime  = performance.now();
+    ds.velX      = 0;
+    ds.scrollLeft = dateScrollRef.current.scrollLeft;
+    dateScrollRef.current.style.cursor = 'grabbing';
+    dateScrollRef.current.style.scrollBehavior = 'auto';
     e.preventDefault();
-    const x = e.pageX - dateScrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    dateScrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const onMouseMove = (e) => {
+    const ds = dragState.current;
+    if (!ds.active) return;
+    const now = performance.now();
+    const dx  = e.pageX - ds.startX;
+    if (Math.abs(dx) > 3) ds.moved = true;
+
+    // Track velocity (px per ms)
+    const dt = now - ds.lastTime;
+    if (dt > 0) {
+      ds.velX = (ds.lastX - e.pageX) / dt;
+    }
+    ds.lastX    = e.pageX;
+    ds.lastTime = now;
+
+    dateScrollRef.current.scrollLeft = ds.scrollLeft - dx;
+  };
+
+  const onMouseUp = () => {
+    const ds = dragState.current;
+    ds.active = false;
+    if (dateScrollRef.current) {
+      dateScrollRef.current.style.cursor = '';
+      dateScrollRef.current.style.scrollBehavior = '';
+    }
+    // Kick off momentum if the user was moving fast enough
+    if (Math.abs(ds.velX) > 0.3) {
+      ds.rafId = requestAnimationFrame(applyMomentum);
+    }
+  };
+
+  const onMouseLeave = () => {
+    const ds = dragState.current;
+    if (!ds.active) return;
+    ds.active = false;
+    if (dateScrollRef.current) {
+      dateScrollRef.current.style.cursor = '';
+      dateScrollRef.current.style.scrollBehavior = '';
+    }
+    if (Math.abs(ds.velX) > 0.3) {
+      ds.rafId = requestAnimationFrame(applyMomentum);
+    }
   };
 
   const formatDateForDisplay = (dateStr) => {
@@ -145,6 +242,7 @@ const ScheduleForm = ({ onSuccess }) => {
   };
 
   const handleDateClick = (dateObj) => {
+    if (dragState.current.moved) return; // ignore click if user was dragging
     setTempDate(dateObj);
     setShowTimeModal(true);
   };
@@ -158,8 +256,15 @@ const ScheduleForm = ({ onSuccess }) => {
     setShowTimeModal(false);
   };
 
-  const submitAppointment = async (e) => {
+  // Show confirmation modal instead of submitting directly
+  const handleSubmitClick = (e) => {
     e.preventDefault();
+    setFormError('');
+    setShowConfirm(true);
+  };
+
+  const submitAppointment = async () => {
+    setShowConfirm(false);
     setSubmitting(true);
     setFormError('');
 
@@ -187,7 +292,7 @@ const ScheduleForm = ({ onSuccess }) => {
         <h2 className="sf-title">Schedule a Patient</h2>
         <p className="sf-subtitle">Please enter the patient's name, phone number, service, and its date and time!</p>
         
-        <form className="sf-form" onSubmit={submitAppointment}>
+        <form className="sf-form" onSubmit={handleSubmitClick}>
           {formError && <div style={{ color: 'var(--error-red)', fontSize: '0.9rem', marginBottom: '1rem' }}><AlertCircle size={15}/> {formError}</div>}
           
           <div className="sf-field">
@@ -214,6 +319,7 @@ const ScheduleForm = ({ onSuccess }) => {
             <div className="sf-date-header">
               <span>Choose a Date and Time</span>
               <div className="sf-month-nav">
+                <button type="button" className="sf-today-btn" onClick={scrollToToday}>Today</button>
                 <button type="button" onClick={() => navigateToMonth(-1)}><ChevronLeft size={16}/></button>
                 <span style={{ minWidth: '100px', textAlign: 'center' }}>
                   {currentMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
@@ -234,15 +340,17 @@ const ScheduleForm = ({ onSuccess }) => {
                 {datesList.map((d) => {
                   const dateStr = formatDateForBackend(d);
                   const isSelected = form.preferred_date === dateStr;
+                  const todayStr = formatDateForBackend(new Date());
+                  const isToday = dateStr === todayStr;
                   
                   return (
                     <div 
                       key={dateStr} 
                       data-date={dateStr}
-                      className={`sf-date-box ${isSelected ? 'sf-date-box--selected' : ''}`}
+                      className={`sf-date-box ${isSelected ? 'sf-date-box--selected' : ''} ${isToday ? 'sf-date-box--today' : ''}`}
                       onClick={() => {
-                        if (!isDragging) handleDateClick(d);
-                      }}
+                    if (!dragState.current.moved) handleDateClick(d);
+                  }}
                     >
                       <span className="sf-date-box__month">{d.toLocaleDateString('en-US', { month: 'short' })}</span>
                       <span className="sf-date-box__day">{d.getDate()}</span>
@@ -263,6 +371,18 @@ const ScheduleForm = ({ onSuccess }) => {
           </button>
         </form>
       </div>
+
+      {showConfirm && (
+        <ModalConfirmation
+          title="Confirm Appointment"
+          message={`Schedule ${form.patient_name || 'this patient'} on ${form.preferred_date ? new Date(form.preferred_date + 'T00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '—'} at ${form.preferred_time || '—'}?`}
+          confirmText="Yes, Schedule"
+          cancelText="Go Back"
+          loading={submitting}
+          onConfirm={submitAppointment}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
 
       {showTimeModal && (
         <Modal 

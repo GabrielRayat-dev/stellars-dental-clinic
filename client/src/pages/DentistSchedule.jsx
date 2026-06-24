@@ -7,6 +7,7 @@ import ScheduleForm from '../components/ScheduleForm';
 import AdminPagination from '../components/AdminPagination';
 import ButtonWithIcons from '../components/ButtonWithIcons';
 import SearchBar from '../components/SearchBar';
+import ModalConfirmation from '../components/ModalConfirmation';
 import { TableWrap, Table } from '../components/Table';
 import '../styles/DentistSchedule.css';
 
@@ -27,6 +28,11 @@ const DentistSchedule = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Confirmation modal state
+  // pendingAction: { type: 'approve'|'reject', app: object } | null
+  const [pendingAction, setPendingAction] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const fetchAppointments = useCallback(async () => {
     try {
@@ -71,31 +77,38 @@ const DentistSchedule = () => {
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  // Actions
-  const handleApprove = async (id) => {
+  // Actions — now go through confirmation
+  const requestApprove = (app) => setPendingAction({ type: 'approve', app });
+  const requestReject  = (app) => setPendingAction({ type: 'reject',  app });
+
+  const confirmAction = async () => {
+    if (!pendingAction) return;
+    setActionLoading(true);
+    const { type, app } = pendingAction;
     try {
-      const res = await fetch(`/api/appointments/${id}/approve`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) fetchAppointments();
+      if (type === 'approve') {
+        const res = await fetch(`/api/appointments/${app.id}/approve`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) fetchAppointments();
+      } else {
+        const res = await fetch(`/api/appointments/${app.id}/reject`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ rejected_reason: 'Rejected by Dentist' })
+        });
+        if (res.ok) fetchAppointments();
+      }
     } catch (err) {
-      console.error('Error approving:', err);
+      console.error('Action error:', err);
+    } finally {
+      setActionLoading(false);
+      setPendingAction(null);
     }
   };
 
-  const handleReject = async (id) => {
-    try {
-      const res = await fetch(`/api/appointments/${id}/reject`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ rejected_reason: 'Rejected by Dentist' })
-      });
-      if (res.ok) fetchAppointments();
-    } catch (err) {
-      console.error('Error rejecting:', err);
-    }
-  };
+  const cancelAction = () => setPendingAction(null);
 
   return (
     <main className="ds-page">
@@ -163,12 +176,12 @@ const DentistSchedule = () => {
                         <div className="ds-action-btns">
                           {activeTab === 'pending' && (
                             <>
-                              <button className="ds-action-btn ds-action-btn--approve" onClick={() => handleApprove(app.id)}>Approve</button>
-                              <button className="ds-action-btn ds-action-btn--reject" onClick={() => handleReject(app.id)}>Reject</button>
+                              <button className="ds-action-btn ds-action-btn--approve" onClick={() => requestApprove(app)}>Approve</button>
+                              <button className="ds-action-btn ds-action-btn--reject" onClick={() => requestReject(app)}>Reject</button>
                             </>
                           )}
                           {activeTab === 'approved' && (
-                            <button className="ds-action-btn ds-action-btn--reject" onClick={() => handleReject(app.id)}>Remove</button>
+                            <button className="ds-action-btn ds-action-btn--reject" onClick={() => requestReject(app)}>Remove</button>
                           )}
                         </div>
                       </td>
@@ -196,6 +209,34 @@ const DentistSchedule = () => {
             }} />
           )}
         </>
+      )}
+
+      {/* ── Action Confirmation Modal ── */}
+      {pendingAction && (
+        <ModalConfirmation
+          title={
+            pendingAction.type === 'approve'
+              ? 'Approve Appointment?'
+              : activeTab === 'approved'
+              ? 'Remove Appointment?'
+              : 'Reject Appointment?'
+          }
+          message={
+            pendingAction.type === 'approve'
+              ? `Approve the appointment for ${pendingAction.app.patient_name} on ${formatDateForDisplay(pendingAction.app.preferred_date)} at ${pendingAction.app.preferred_time || '—'}?`
+              : activeTab === 'approved'
+              ? `Remove the approved appointment for ${pendingAction.app.patient_name}? This will mark it as rejected.`
+              : `Reject the appointment for ${pendingAction.app.patient_name} on ${formatDateForDisplay(pendingAction.app.preferred_date)} at ${pendingAction.app.preferred_time || '—'}?`
+          }
+          confirmText={
+            pendingAction.type === 'approve' ? 'Yes, Approve' : activeTab === 'approved' ? 'Yes, Remove' : 'Yes, Reject'
+          }
+          cancelText="Go Back"
+          loading={actionLoading}
+          danger={pendingAction.type === 'reject'}
+          onConfirm={confirmAction}
+          onCancel={cancelAction}
+        />
       )}
     </main>
   );

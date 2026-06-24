@@ -1,0 +1,118 @@
+/* ── ModalConfirmation Component ─────────────────── */
+.mc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 58, 43, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: mc-fade 0.2s ease;
+}
+
+@keyframes mc-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.mc-modal {
+  background: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem 2rem 2rem;
+  border-top: 4px solid var(--primary-green);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  animation: mc-slide 0.2s ease;
+}
+
+@keyframes mc-slide {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mc-icon-wrap {
+  background: rgba(61, 118, 85, 0.08);
+  border-radius: 50%;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.mc-icon {
+  color: var(--primary-green);
+}
+
+.mc-title {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.mc-message {
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.mc-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  width: 100%;
+}
+
+.mc-btn {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  border: none;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mc-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.mc-btn--cancel {
+  background: transparent;
+  border: 2px solid var(--border-light);
+  color: var(--text-muted);
+}
+
+.mc-btn--cancel:hover:not(:disabled) {
+  border-color: var(--text-muted);
+  color: var(--text-dark);
+}
+
+.mc-btn--confirm {
+  background: var(--primary-green);
+  color: #ffffff;
+}
+
+.mc-btn--confirm:hover:not(:disabled) {
+  background: var(--primary-green-hover);
+}
+
+.mc-btn--danger {
+  background: var(--error-red);
+  color: #ffffff;
+}
+
+.mc-btn--danger:hover:not(:disabled) {
+  background: #b83a36;
+}

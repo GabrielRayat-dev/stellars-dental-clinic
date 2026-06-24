@@ -60,7 +60,7 @@
 }
 
 .ds-action-btn--reject {
-  background-color: #ff7675; /* Soft red as seen in design */
+  background-color: var(--error-red);
 }
 
 /* ── Schedule Form View ─────────────────────── */
