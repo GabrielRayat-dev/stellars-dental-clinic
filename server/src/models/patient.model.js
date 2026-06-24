@@ -1,8 +1,8 @@
-const { supabase } = require('../config/supabase');
+const { supabaseAdmin } = require('../config/supabase');
 
 // Get all patients
 const getAllPatients = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('patients')
     .select('*')
     .order('created_at', { ascending: false });
@@ -13,7 +13,7 @@ const getAllPatients = async () => {
 
 // Get single patient with full records
 const getPatientById = async (id) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('patients')
     .select(`
       *,
@@ -32,7 +32,7 @@ const getPatientById = async (id) => {
 
 // Create patient
 const createPatient = async (patientData, createdBy) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('patients')
     .insert({
       ...patientData,
@@ -47,7 +47,7 @@ const createPatient = async (patientData, createdBy) => {
 
 // Update patient
 const updatePatient = async (id, patientData) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('patients')
     .update({
       ...patientData,
@@ -74,7 +74,7 @@ const deletePatient = async (id) => {
 
 // Add diagnosis record
 const addDiagnosisRecord = async (patientId, diagnosisData, createdBy) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('diagnosis_records')
     .insert({
       ...diagnosisData,
@@ -90,7 +90,7 @@ const addDiagnosisRecord = async (patientId, diagnosisData, createdBy) => {
 
 // Update diagnosis record
 const updateDiagnosisRecord = async (id, diagnosisData) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('diagnosis_records')
     .update({
       ...diagnosisData,
@@ -106,7 +106,7 @@ const updateDiagnosisRecord = async (id, diagnosisData) => {
 
 // Delete diagnosis record
 const deleteDiagnosisRecord = async (id) => {
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('diagnosis_records')
     .delete()
     .eq('id', id);
@@ -117,7 +117,7 @@ const deleteDiagnosisRecord = async (id) => {
 
 // Add patient image
 const addPatientImage = async (patientId, fileUrl, fileName, uploadedBy) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('patient_images')
     .insert({
       patient_id: patientId,
@@ -134,13 +134,21 @@ const addPatientImage = async (patientId, fileUrl, fileName, uploadedBy) => {
 
 // Delete patient image
 const deletePatientImage = async (id) => {
-  const { error } = await supabase
+  const { data: imgData, error: imgError } = await supabaseAdmin
+    .from('patient_images')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (imgError) throw imgError;
+
+  const { error } = await supabaseAdmin
     .from('patient_images')
     .delete()
     .eq('id', id);
 
   if (error) throw error;
-  return { message: 'Image deleted successfully' };
+  return { message: 'Image deleted successfully', image: imgData };
 };
 
 module.exports = {

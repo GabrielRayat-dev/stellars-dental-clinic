@@ -191,6 +191,16 @@ const deletePatientImage = async (req, res) => {
   try {
     const { imageId } = req.params;
     const data = await patientModel.deletePatientImage(imageId);
+    
+    // Also delete the file from Supabase storage
+    if (data.image && data.image.file_url) {
+      const urlParts = data.image.file_url.split('/patient-image/');
+      if (urlParts.length === 2) {
+        const filePath = urlParts[1];
+        await supabaseAdmin.storage.from('patient-image').remove([filePath]);
+      }
+    }
+
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });

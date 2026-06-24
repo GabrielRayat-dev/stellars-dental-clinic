@@ -11,5 +11,6 @@ router.get('/', authenticate, authorizeDentist, serviceController.getAllServices
 router.post('/', authenticate, authorizeDentist, serviceController.createService);
 router.put('/:id', authenticate, authorizeDentist, serviceController.updateService);
 router.patch('/:id/toggle', authenticate, authorizeDentist, serviceController.toggleServiceStatus);
+router.delete('/:id', authenticate, authorizeDentist, serviceController.deleteService);
 
 module.exports = router;

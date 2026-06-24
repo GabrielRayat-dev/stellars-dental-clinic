@@ -1,8 +1,8 @@
-const { supabase } = require('../config/supabase');
+const { supabaseAdmin } = require('../config/supabase');
 
 // Get all services
 const getAllServices = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('services')
     .select('*')
     .order('created_at', { ascending: true });
@@ -13,7 +13,7 @@ const getAllServices = async () => {
 
 // Get active services only (for public and dropdowns)
 const getActiveServices = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('services')
     .select('*')
     .eq('is_active', true)
@@ -25,7 +25,7 @@ const getActiveServices = async () => {
 
 // Get single service
 const getServiceById = async (id) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('services')
     .select('*')
     .eq('id', id)
@@ -37,7 +37,7 @@ const getServiceById = async (id) => {
 
 // Create service
 const createService = async (serviceData) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('services')
     .insert(serviceData)
     .select()
@@ -49,7 +49,7 @@ const createService = async (serviceData) => {
 
 // Update service
 const updateService = async (id, serviceData) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('services')
     .update({
       ...serviceData,
@@ -65,7 +65,7 @@ const updateService = async (id, serviceData) => {
 
 // Toggle service active status
 const toggleServiceStatus = async (id, isActive) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('services')
     .update({
       is_active: isActive,
@@ -79,6 +79,17 @@ const toggleServiceStatus = async (id, isActive) => {
   return data;
 };
 
+// Delete service
+const deleteService = async (id) => {
+  const { error } = await supabaseAdmin
+    .from('services')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+  return { message: 'Service deleted successfully' };
+};
+
 module.exports = {
   getAllServices,
   getActiveServices,
@@ -86,4 +97,5 @@ module.exports = {
   createService,
   updateService,
   toggleServiceStatus,
+  deleteService,
 };

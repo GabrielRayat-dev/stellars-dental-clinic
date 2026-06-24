@@ -119,6 +119,11 @@
   transition: all 0.2s;
 }
 
+.ds-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .ds-input:focus {
   border-color: var(--primary-green);
   box-shadow: 0 0 0 3px rgba(61, 118, 85, 0.1);

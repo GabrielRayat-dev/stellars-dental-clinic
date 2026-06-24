@@ -20,11 +20,35 @@
   box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.3);
 }
 
-.bwi-btn:hover {
+.bwi-btn:hover:not(:disabled) {
   opacity: 1;
 }
 
+.bwi-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Variants ── */
+.bwi-btn--default {
+  background: var(--primary-green);
+}
+
+.bwi-btn--gold {
+  background: var(--gold-accent);
+  color: #fff;
+}
+
+.bwi-btn--danger {
+  background: var(--error-red);
+  color: #fff;
+}
+
 .bwi-icon {
-  /* Using the gold-accent color that was previously on the mini-squares */
-  color: #e8c678; 
+  color: #e8c678;
+}
+
+.bwi-btn--gold .bwi-icon,
+.bwi-btn--danger .bwi-icon {
+  color: rgba(255, 255, 255, 0.8);
 }

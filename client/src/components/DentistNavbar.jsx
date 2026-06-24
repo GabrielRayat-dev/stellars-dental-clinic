@@ -7,6 +7,7 @@ import {
   ClipboardList,
   ChevronDown,
   LogOut,
+  Activity,
 } from 'lucide-react';
 import logo from '../assets/logo.jpg';
 import '../styles/Navbar.css';
@@ -15,6 +16,7 @@ const dentistNavLinks = [
   { label: 'Dashboard',            path: '/dashboard/dentist',          icon: LayoutDashboard },
   { label: 'Schedule Appointment', path: '/dashboard/dentist/schedule', icon: Calendar        },
   { label: 'Patient Record',       path: '/dashboard/dentist/patients', icon: ClipboardList   },
+  { label: 'Services',             path: '/dashboard/dentist/services', icon: Activity        },
 ];
 
 const DentistNavbar = () => {
