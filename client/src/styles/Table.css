@@ -1,0 +1,66 @@
+/* ── Shared Table Component ───────────────────────────────────── */
+.st-table-wrap {
+  background: #ffffff;
+  border-radius: 0;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.st-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  font-family: var(--font-serif);
+}
+
+.st-table thead tr {
+  background-color: var(--primary-green);
+  color: #ffffff;
+}
+
+.st-table th {
+  padding: 0.85rem 1.25rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  font-family: var(--font-serif);
+}
+
+.st-table tbody tr {
+  border-bottom: 1px solid var(--border-light);
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+
+.st-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.st-table tbody tr:hover {
+  background-color: var(--primary-green-light);
+}
+
+.st-table__row--selected {
+  background-color: #ddeee7 !important;
+}
+
+.st-table td {
+  padding: 0.75rem 1.25rem;
+  color: var(--text-dark);
+  text-align: center;
+  font-family: var(--font-serif);
+}
+
+.st-table__center {
+  text-align: center;
+}
+
+.st-table__empty {
+  text-align: center;
+  padding: 2rem !important;
+  color: var(--text-muted);
+  font-style: italic;
+}

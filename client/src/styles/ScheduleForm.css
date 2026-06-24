@@ -1,0 +1,208 @@
+/* ── Schedule Form Component ─────────────────────── */
+.sf-container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.sf-card {
+  width: 100%;
+  max-width: 650px;
+  background: #ffffff;
+  border: 2px solid var(--primary-green);
+  padding: 2.5rem;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.sf-title {
+  font-size: 1.8rem;
+  color: var(--primary-green);
+  margin: 0;
+  font-family: var(--font-serif);
+}
+
+.sf-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 2rem;
+  font-family: var(--font-serif);
+}
+
+.sf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  text-align: left;
+}
+
+.sf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sf-field label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  font-family: var(--font-serif);
+}
+
+.sf-input {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border-light);
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.sf-input:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(61, 118, 85, 0.1);
+}
+
+/* Horizontal Date Carousel */
+.sf-date-picker-wrap {
+  margin-top: 1rem;
+}
+
+.sf-date-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-serif);
+}
+
+.sf-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sf-month-nav button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--primary-green);
+  display: flex;
+  align-items: center;
+}
+
+.sf-date-carousel-wrap {
+  width: 100%;
+}
+
+.sf-date-grid {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  cursor: grab;
+  scroll-snap-type: x mandatory;
+}
+
+.sf-date-grid:active {
+  cursor: grabbing;
+}
+
+.sf-date-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.sf-date-box {
+  flex: 0 0 calc((100% - (6 * 0.5rem)) / 7);
+  scroll-snap-align: start;
+  border: 1px solid var(--primary-green);
+  text-align: center;
+  transition: all 0.2s;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+.sf-date-box__month {
+  background: var(--primary-green);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 0.2rem 0;
+  text-transform: uppercase;
+  font-family: var(--font-serif);
+}
+
+.sf-date-box__day {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-green);
+  padding: 0.6rem 0;
+  font-family: var(--font-serif);
+}
+
+.sf-date-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.sf-date-box--selected {
+  background: var(--primary-green-light);
+}
+
+.sf-submit-btn {
+  margin-top: 1rem;
+  background: var(--primary-green);
+  color: #fff;
+  border: none;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-serif);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sf-submit-btn:hover {
+  background: var(--primary-green-hover);
+}
+
+.sf-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Time Modal Styles */
+.sf-time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+.sf-time-slot {
+  padding: 0.6rem;
+  border: 1px solid var(--primary-green);
+  background: transparent;
+  color: var(--primary-green);
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.sf-time-slot:hover {
+  background: var(--primary-green-light);
+}
+
+.sf-time-slot--selected {
+  background: var(--primary-green);
+  color: #fff;
+}

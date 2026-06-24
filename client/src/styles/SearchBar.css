@@ -1,0 +1,30 @@
+/* ── SearchBar Component ─────────────────────── */
+.sb-wrap {
+  flex: 1;
+  max-width: 500px;
+}
+
+.sb-input {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: 0;
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  font-style: italic;
+  background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.sb-input:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(61, 118, 85, 0.1);
+  font-style: normal;
+}
+
+.sb-input::placeholder {
+  color: var(--text-muted);
+}

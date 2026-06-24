@@ -78,72 +78,7 @@
   background-color: #b83a36;
 }
 
-/* ── Table ───────────────────────────────────── */
-.au-table-wrap {
-  background: #ffffff;
-  border-radius: 0;
-  overflow: hidden;
-  border: 1px solid var(--border-light);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
 
-.au-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-  font-family: var(--font-serif);
-}
-
-.au-table thead tr {
-  background-color: var(--primary-green);
-  color: #ffffff;
-}
-
-.au-table th {
-  padding: 0.85rem 1.25rem;
-  text-align: center;
-  font-weight: 600;
-  font-size: 0.85rem;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-  font-family: var(--font-serif);
-}
-
-.au-table tbody tr {
-  border-bottom: 1px solid var(--border-light);
-  transition: background-color 0.15s ease;
-  cursor: pointer;
-}
-
-.au-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.au-table tbody tr:hover {
-  background-color: var(--primary-green-light);
-}
-
-.au-table__row--selected {
-  background-color: #ddeee7 !important;
-}
-
-.au-table td {
-  padding: 0.75rem 1.25rem;
-  color: var(--text-dark);
-  text-align: center;
-  font-family: var(--font-serif);
-}
-
-.au-table__center {
-  text-align: center;
-}
-
-.au-table__empty {
-  text-align: center;
-  padding: 2rem !important;
-  color: var(--text-muted);
-  font-style: italic;
-}
 
 /* Receive emails checkbox — sharp square */
 .au-checkbox-dot {

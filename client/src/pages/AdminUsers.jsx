@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import AdminPagination from '../components/AdminPagination';
 import Modal from '../components/Modal';
+import { TableWrap, Table } from '../components/Table';
 import '../styles/AdminUsers.css';
 
 const ROWS_PER_PAGE = 8;
@@ -184,7 +185,7 @@ const AdminUsers = () => {
       </div>
 
       {/* Table */}
-      <div className="au-table-wrap">
+      <TableWrap>
         {loading ? (
           <div className="au-state au-state--loading">
             <Loader2 size={24} className="au-spin" />
@@ -196,45 +197,33 @@ const AdminUsers = () => {
             <span>{error}</span>
           </div>
         ) : (
-          <table className="au-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Role</th>
-                <th>Phone Number</th>
-                <th>Email</th>
-                <th>Receive Emails</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pageUsers.length === 0 ? (
-                <tr><td colSpan={6} className="au-table__empty">No users found.</td></tr>
-              ) : (
-                pageUsers.map((u) => (
-                  <tr
-                    key={u.id}
-                    className={`au-table__row ${selectedId === u.id ? 'au-table__row--selected' : ''}`}
-                    onClick={() => setSelectedId(u.id === selectedId ? null : u.id)}
-                  >
-                    <td>{u.name || '—'}</td>
-                    <td>{ROLE_LABELS[u.role] || u.role}</td>
-                    <td>{u.phone_number || '—'}</td>
-                    <td>{u.email || '—'}</td>
-                    <td className="au-table__center">
-                      <span className={`au-checkbox-dot ${u.receive_emails ? 'au-checkbox-dot--on' : ''}`} />
-                    </td>
-                    <td>
-                      <span className={`au-badge ${u.status ? 'au-badge--active' : 'au-badge--inactive'}`}>
-                        <span className="au-badge__dot" />
-                        {u.status ? 'active' : 'not active'}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          <Table headers={['Name', 'Role', 'Phone Number', 'Email', 'Receive Emails', 'Status']}>
+            {pageUsers.length === 0 ? (
+              <tr><td colSpan={6} className="st-table__empty">No users found.</td></tr>
+            ) : (
+              pageUsers.map((u) => (
+                <tr
+                  key={u.id}
+                  className={selectedId === u.id ? 'st-table__row--selected' : ''}
+                  onClick={() => setSelectedId(u.id === selectedId ? null : u.id)}
+                >
+                  <td>{u.name || '—'}</td>
+                  <td>{ROLE_LABELS[u.role] || u.role}</td>
+                  <td>{u.phone_number || '—'}</td>
+                  <td>{u.email || '—'}</td>
+                  <td className="st-table__center">
+                    <span className={`au-checkbox-dot ${u.receive_emails ? 'au-checkbox-dot--on' : ''}`} />
+                  </td>
+                  <td>
+                    <span className={`au-badge ${u.status ? 'au-badge--active' : 'au-badge--inactive'}`}>
+                      <span className="au-badge__dot" />
+                      {u.status ? 'active' : 'not active'}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </Table>
         )}
 
         {/* Pagination inside table wrapper */}
@@ -247,7 +236,7 @@ const AdminUsers = () => {
             onPageChange={setPage}
           />
         )}
-      </div>
+      </TableWrap>
 
       {/* ── ADD MODAL ───────────────────────── */}
       {showAdd && (

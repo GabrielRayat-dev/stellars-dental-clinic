@@ -1,0 +1,265 @@
+/* ─────────────────────────────────────────────
+   Dentist Schedule Page
+   ───────────────────────────────────────────── */
+
+.ds-page {
+  padding: 2.5rem 5%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  font-family: var(--font-serif);
+  z-index: 1;
+}
+
+/* ── Top Controls (Search & Tabs) ───────────── */
+.ds-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+
+
+.ds-tabs {
+  display: flex;
+  gap: 0.75rem;
+}
+
+
+
+
+
+
+/* Actions in Table */
+.ds-action-btns {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.ds-action-btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+  transition: opacity 0.2s;
+  font-family: var(--font-serif);
+}
+
+.ds-action-btn:hover {
+  opacity: 0.85;
+}
+
+.ds-action-btn--approve {
+  background-color: var(--primary-green);
+}
+
+.ds-action-btn--reject {
+  background-color: #ff7675; /* Soft red as seen in design */
+}
+
+/* ── Schedule Form View ─────────────────────── */
+.ds-schedule-container {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  background: #fff; /* White background inside the green border */
+}
+
+.ds-form-card {
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+}
+
+.ds-form-title {
+  font-size: 1.8rem;
+  color: var(--primary-green);
+  margin: 0;
+}
+
+.ds-form-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+
+.ds-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  text-align: left;
+}
+
+.ds-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ds-field label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.ds-input {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border-light);
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.ds-input:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(61, 118, 85, 0.1);
+}
+
+/* Horizontal Date Carousel */
+.ds-date-picker-wrap {
+  margin-top: 1rem;
+}
+
+.ds-date-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.ds-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ds-month-nav button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--primary-green);
+  display: flex;
+  align-items: center;
+}
+
+.ds-date-carousel-wrap {
+  width: 100%;
+}
+
+.ds-date-grid {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+  scrollbar-width: none; /* Firefox */
+  scroll-behavior: smooth;
+  cursor: grab;
+  scroll-snap-type: x mandatory;
+}
+
+.ds-date-grid:active {
+  cursor: grabbing;
+}
+
+.ds-date-grid::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.ds-date-box {
+  /* Ensure exactly 7 items fit in the viewport minus gaps */
+  flex: 0 0 calc((100% - (6 * 0.5rem)) / 7);
+  scroll-snap-align: start;
+  border: 1px solid var(--primary-green);
+  text-align: center;
+  transition: all 0.2s;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+.ds-date-box__month {
+  background: var(--primary-green);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 0.2rem 0;
+  text-transform: uppercase;
+}
+
+.ds-date-box__day {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-green);
+  padding: 0.6rem 0;
+}
+
+.ds-date-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.ds-date-box--selected {
+  background: var(--primary-green-light);
+}
+
+.ds-submit-btn {
+  margin-top: 1rem;
+  background: var(--primary-green);
+  color: #fff;
+  border: none;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-serif);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ds-submit-btn:hover {
+  background: var(--primary-green-hover);
+}
+
+.ds-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Time Modal Styles */
+.ds-time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+.ds-time-slot {
+  padding: 0.6rem;
+  border: 1px solid var(--primary-green);
+  background: transparent;
+  color: var(--primary-green);
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.ds-time-slot:hover {
+  background: var(--primary-green-light);
+}
+
+.ds-time-slot--selected {
+  background: var(--primary-green);
+  color: #fff;
+}
