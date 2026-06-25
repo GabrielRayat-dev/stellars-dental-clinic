@@ -199,11 +199,13 @@ const DentistPatientDetails = () => {
       <div style={{ padding: '0 2rem' }}>
         {/* ── PROFILE TAB ── */}
         {activeTab === 'Profile' && (
-          <div style={{ background: '#fff', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '2rem' }}>
-            <h3 style={{ marginTop: 0, color: 'var(--primary-green)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <User size={20} /> Personal Information
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
+          <div style={{ background: '#fff', border: '1px solid var(--border-light)', borderRadius: '8px', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--primary-green)', padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <User size={20} color="#fff" />
+              <h3 style={{ margin: 0, color: '#fff', fontWeight: 600, fontSize: '1rem' }}>Personal Information</h3>
+            </div>
+            <div style={{ padding: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div><strong style={{ color: 'var(--text-muted)' }}>Full Name:</strong> <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{patient.name}</div></div>
               <div><strong style={{ color: 'var(--text-muted)' }}>Phone Number:</strong> <div>{patient.phone_number}</div></div>
               <div><strong style={{ color: 'var(--text-muted)' }}>Age & Sex:</strong> <div>{patient.age} / {patient.sex}</div></div>
@@ -212,6 +214,7 @@ const DentistPatientDetails = () => {
               <div><strong style={{ color: 'var(--text-muted)' }}>Blood Type:</strong> <div>{patient.blood_type}</div></div>
               <div><strong style={{ color: 'var(--text-muted)' }}>Emergency Contact:</strong> <div>{patient.emergency_contact}</div></div>
               <div style={{ gridColumn: '1 / -1' }}><strong style={{ color: 'var(--text-muted)' }}>Full Address:</strong> <div>{patient.address}</div></div>
+            </div>
             </div>
           </div>
         )}
