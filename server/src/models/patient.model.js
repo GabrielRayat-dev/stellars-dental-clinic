@@ -19,9 +19,9 @@ const getPatientById = async (id) => {
       *,
       diagnosis_records(
         *,
-        chief_complaint:services(id, name)
-      ),
-      patient_images(*)
+        chief_complaint:services(id, name),
+        patient_images(*)
+      )
     `)
     .eq('id', id)
     .single();
@@ -63,7 +63,7 @@ const updatePatient = async (id, patientData) => {
 
 // Delete patient
 const deletePatient = async (id) => {
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('patients')
     .delete()
     .eq('id', id);
@@ -115,15 +115,38 @@ const deleteDiagnosisRecord = async (id) => {
   return { message: 'Diagnosis record deleted successfully' };
 };
 
-// Add patient image
-const addPatientImage = async (patientId, fileUrl, fileName, uploadedBy) => {
+// Verify a diagnosis record belongs to the patient before attaching images
+const verifyDiagnosisRecordBelongsToPatient = async (patientId, diagnosisRecordId) => {
+  const { data, error } = await supabaseAdmin
+    .from('diagnosis_records')
+    .select('id, patient_id')
+    .eq('id', diagnosisRecordId)
+    .eq('patient_id', patientId)
+    .maybeSingle(); // returns null instead of throwing when no row matches
+
+  if (error) throw error;
+
+  if (!data) {
+    const notFoundError = new Error('Diagnosis record does not belong to this patient');
+    notFoundError.statusCode = 404;
+    throw notFoundError;
+  }
+
+  return data;
+};
+
+const addPatientImage = async (patientId, diagnosisRecordId, fileUrl, fileName, uploadedBy) => {
+  await verifyDiagnosisRecordBelongsToPatient(patientId, diagnosisRecordId);
+
   const { data, error } = await supabaseAdmin
     .from('patient_images')
     .insert({
       patient_id: patientId,
+      diagnosis_record_id: diagnosisRecordId,
       file_url: fileUrl,
       file_name: fileName,
       uploaded_by: uploadedBy,
+      uploaded_at: new Date(),
     })
     .select()
     .single();
@@ -160,6 +183,8 @@ module.exports = {
   addDiagnosisRecord,
   updateDiagnosisRecord,
   deleteDiagnosisRecord,
+  verifyDiagnosisRecordBelongsToPatient,
   addPatientImage,
   deletePatientImage,
 };
+

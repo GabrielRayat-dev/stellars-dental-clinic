@@ -1,5 +1,6 @@
 const patientModel = require('../models/patient.model');
 const { supabaseAdmin } = require('../config/supabase');
+const { randomUUID } = require('crypto');
 
 // Get all patients
 const getAllPatients = async (req, res) => {
@@ -137,24 +138,31 @@ const deleteDiagnosisRecord = async (req, res) => {
   }
 };
 
-// Add patient image
+// Add patient image to a specific diagnosis record
 const addPatientImage = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id, recordId } = req.params; // id = patient id, recordId = diagnosis record id
+
+    if (!recordId) {
+      return res.status(400).json({ message: 'recordId is required' });
+    }
 
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
     const file = req.file;
-    const fileExt = file.originalname.split('.').pop();
-    const fileName = `${id}/${Date.now()}.${fileExt}`;
+    const fileExt = file.originalname.split('.').pop().toLowerCase();
+    const fileName = `${Date.now()}-${randomUUID()}.${fileExt}`;
+    const filePath = `${id}/${recordId}/${fileName}`;
 
-    // Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabaseAdmin
+    await patientModel.verifyDiagnosisRecordBelongsToPatient(id, recordId);
+
+    // Upload to Supabase Storage using a unique path per image
+    const { error: uploadError } = await supabaseAdmin
       .storage
       .from('patient-image')
-      .upload(fileName, file.buffer, {
+      .upload(filePath, file.buffer, {
         contentType: file.mimetype,
         upsert: false,
       });
@@ -167,11 +175,11 @@ const addPatientImage = async (req, res) => {
     const { data: urlData } = supabaseAdmin
       .storage
       .from('patient-image')
-      .getPublicUrl(fileName);
-
-    // Save to database
+      .getPublicUrl(filePath);
+    // Save the image row under the diagnosis record
     const data = await patientModel.addPatientImage(
       id,
+      recordId,
       urlData.publicUrl,
       file.originalname,
       req.profile.id
@@ -182,7 +190,7 @@ const addPatientImage = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+  res.status(error.statusCode || 500).json({ message: error.message });
   }
 };
 
@@ -191,7 +199,7 @@ const deletePatientImage = async (req, res) => {
   try {
     const { imageId } = req.params;
     const data = await patientModel.deletePatientImage(imageId);
-    
+
     // Also delete the file from Supabase storage
     if (data.image && data.image.file_url) {
       const urlParts = data.image.file_url.split('/patient-image/');
@@ -219,3 +227,4 @@ module.exports = {
   addPatientImage,
   deletePatientImage,
 };
+

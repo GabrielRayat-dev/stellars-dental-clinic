@@ -16,8 +16,9 @@ router.post('/:id/diagnosis', authenticate, authorizeStaff, patientController.ad
 router.put('/:id/diagnosis/:recordId', authenticate, authorizeStaff, patientController.updateDiagnosisRecord);
 router.delete('/:id/diagnosis/:recordId', authenticate, authorizeStaff, patientController.deleteDiagnosisRecord);
 
-// Patient images — multer runs first then auth
-router.post('/:id/images', upload.single('image'), authenticate, authorizeStaff, patientController.addPatientImage);
+// Patient images are tied to a specific diagnosis record
+router.post('/:id/diagnosis/:recordId/images', authenticate, authorizeStaff, upload.single('image'), patientController.addPatientImage);
 router.delete('/:id/images/:imageId', authenticate, authorizeStaff, patientController.deletePatientImage);
 
 module.exports = router;
+
