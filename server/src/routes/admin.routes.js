@@ -21,4 +21,7 @@ router.put('/staff/:id', adminController.updateStaff);
 // Delete staff
 router.delete('/staff/:id', adminController.deleteStaff);
 
+
+// router.get('/audit-logs', adminController.getAuditLogs);
+
 module.exports = router;

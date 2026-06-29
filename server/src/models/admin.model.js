@@ -35,7 +35,7 @@ const createStaff = async (email, password, profileData) => {
 
   if (authError) throw authError;
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('profiles')
     .update({
       ...profileData,
@@ -44,6 +44,7 @@ const createStaff = async (email, password, profileData) => {
     })
     .eq('user_id', authData.user.id)
     .select()
+    .single();
 
   if (error) throw error;
   return data;

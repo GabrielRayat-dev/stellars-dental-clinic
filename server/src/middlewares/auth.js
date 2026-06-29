@@ -57,9 +57,17 @@ const authorizeStaff = (req, res, next) => {
   next();
 };
 
+const authorizeAdminOrDentist = (req, res, next) => {
+  if (!['admin', 'dentist'].includes(req.profile.role)) {
+    return res.status(403).json({ message: 'Forbidden: Admin or Dentist access only' });
+  }
+  next();
+};
+
 module.exports = {
   authenticate,
   authorizeAdmin,
   authorizeDentist,
   authorizeStaff,
+  authorizeAdminOrDentist,
 };

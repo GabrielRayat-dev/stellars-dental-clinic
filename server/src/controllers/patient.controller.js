@@ -1,6 +1,7 @@
 const patientModel = require('../models/patient.model');
 const { supabaseAdmin } = require('../config/supabase');
 const { randomUUID } = require('crypto');
+const auditModel = require('../models/audit.model');
 
 // Get all patients
 const getAllPatients = async (req, res) => {
@@ -49,6 +50,16 @@ const createPatient = async (req, res) => {
     }
 
     const data = await patientModel.createPatient(req.body, req.profile.id);
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'create',
+      resourceType: 'patient',
+      resourceId: data.id,
+    });
+
     res.status(201).json({
       message: 'Patient created successfully',
       data,
@@ -68,6 +79,16 @@ const updatePatient = async (req, res) => {
     }
 
     const data = await patientModel.updatePatient(id, req.body);
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'update',
+      resourceType: 'patient',
+      resourceId: id,
+    });
+
     res.status(200).json({
       message: 'Patient updated successfully',
       data,
@@ -82,6 +103,16 @@ const deletePatient = async (req, res) => {
   try {
     const { id } = req.params;
     const data = await patientModel.deletePatient(id);
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'delete',
+      resourceType: 'patient',
+      resourceId: id,
+    });
+
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -118,6 +149,16 @@ const updateDiagnosisRecord = async (req, res) => {
     }
 
     const data = await patientModel.updateDiagnosisRecord(recordId, req.body);
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'update',
+      resourceType: 'diagnosis_record',
+      resourceId: recordId,
+    });
+
     res.status(200).json({
       message: 'Diagnosis record updated successfully',
       data,
@@ -132,6 +173,16 @@ const deleteDiagnosisRecord = async (req, res) => {
   try {
     const { recordId } = req.params;
     const data = await patientModel.deleteDiagnosisRecord(recordId);
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'delete',
+      resourceType: 'diagnosis_record',
+      resourceId: recordId,
+    });
+
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -208,6 +259,15 @@ const deletePatientImage = async (req, res) => {
         await supabaseAdmin.storage.from('patient-image').remove([filePath]);
       }
     }
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'delete',
+      resourceType: 'patient_image',
+      resourceId: imageId,
+    });
 
     res.status(200).json(data);
   } catch (error) {

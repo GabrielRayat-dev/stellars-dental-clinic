@@ -1,4 +1,5 @@
 const adminModel = require('../models/admin.model');
+const auditModel = require('../models/audit.model');
 
 // Get all staff
 const getAllStaff = async (req, res) => {
@@ -44,14 +45,24 @@ const createStaff = async (req, res) => {
     if (!['dentist', 'assistant'].includes(profileData.role)) {
       return res.status(400).json({ message: 'Role must be dentist or assistant' });
     }
+
     const data = await adminModel.createStaff(email, password, profileData);
-    
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'create',
+      resourceType: 'staff',
+      resourceId: data.id,
+    });
+
     res.status(201).json({
       message: 'Staff created successfully',
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message, details: error });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -66,6 +77,16 @@ const updateStaff = async (req, res) => {
     }
 
     const data = await adminModel.updateStaff(id, profileData);
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'update',
+      resourceType: 'staff',
+      resourceId: id,
+    });
+
     res.status(200).json({
       message: 'Staff updated successfully',
       data,
@@ -86,6 +107,16 @@ const deleteStaff = async (req, res) => {
     }
 
     const data = await adminModel.deleteStaff(id);
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'delete',
+      resourceType: 'staff',
+      resourceId: id,
+    });
+
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });

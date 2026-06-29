@@ -1,5 +1,6 @@
-// const { supabase } = require('../config/supabase');
 const { supabase, supabaseAdmin } = require('../config/supabase');
+const auditModel = require('../models/audit.model');
+
 
 const login = async (req, res) => {
   try {
@@ -29,6 +30,13 @@ const login = async (req, res) => {
     if (profileError) {
       return res.status(500).json({ message: 'Error retrieving profile' });
     }
+
+    await auditModel.logAction({
+      actorId: profile.id,
+      actorName: profile.name,
+      actorRole: profile.role,
+      action: 'login',
+    });
 
     res.status(200).json({
       message: 'Login successful',
@@ -84,29 +92,28 @@ const changePassword = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    // Get the user before signing out
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-
     // Update profile status to logged_out
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({ status: 'logged_out' })
-      .eq('user_id', user.id);
+      .eq('user_id', req.user.id);
 
     if (profileError) {
       return res.status(500).json({ message: 'Error updating profile status' });
     }
 
-    // Now sign out from Supabase auth
     const { error } = await supabase.auth.signOut();
 
     if (error) {
       return res.status(500).json({ message: error.message });
     }
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'logout',
+    });
 
     res.status(200).json({ message: 'Logged out successfully' });
   } catch (error) {

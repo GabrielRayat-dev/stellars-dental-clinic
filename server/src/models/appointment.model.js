@@ -1,8 +1,8 @@
-const { supabase } = require('../config/supabase');
+const { supabase, supabaseAdmin } = require('../config/supabase');
 
 // Get all appointments
 const getAllAppointments = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('appointments')
     .select(`
       *,
@@ -16,7 +16,7 @@ const getAllAppointments = async () => {
 
 // Get single appointment
 const getAppointmentById = async (id) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('appointments')
     .select(`
       *,
@@ -37,7 +37,7 @@ const createAppointment = async (appointmentData) => {
     .select('id, status')
     .eq('phone_number', appointmentData.phone_number)
     .in('status', ['pending', 'approved'])
-    .single();
+    .maybeSingle();
 
   if (existing) {
     throw new Error('This phone number already has an active appointment request');
@@ -55,7 +55,7 @@ const createAppointment = async (appointmentData) => {
 
 // Update appointment status (approve or reject)
 const updateAppointmentStatus = async (id, status, handledBy, rejectedReason = null) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('appointments')
     .update({
       status,
@@ -73,7 +73,7 @@ const updateAppointmentStatus = async (id, status, handledBy, rejectedReason = n
 
 // Get rejected appointments list
 const getRejectedAppointments = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('appointments')
     .select(`
       *,
@@ -88,7 +88,7 @@ const getRejectedAppointments = async () => {
 
 // Clear rejected appointment
 const clearRejectedAppointment = async (id) => {
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('appointments')
     .delete()
     .eq('id', id)
@@ -100,7 +100,7 @@ const clearRejectedAppointment = async (id) => {
 
 // Check appointment status (public — status verification)
 const checkAppointmentStatus = async (patientName, phoneNumber) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('appointments')
     .select(`
       status,
@@ -113,7 +113,7 @@ const checkAppointmentStatus = async (patientName, phoneNumber) => {
     .eq('patient_name', patientName)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   return data;

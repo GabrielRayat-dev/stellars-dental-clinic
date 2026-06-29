@@ -1,4 +1,5 @@
 const appointmentModel = require('../models/appointment.model');
+const auditModel = require('../models/audit.model');
 
 // Get all appointments
 const getAllAppointments = async (req, res) => {
@@ -97,6 +98,15 @@ const rejectAppointment = async (req, res) => {
       rejected_reason
     );
 
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'reject',
+      resourceType: 'appointment',
+      resourceId: id,
+    });
+
     res.status(200).json({
       message: 'Appointment rejected successfully',
       data,
@@ -129,6 +139,16 @@ const clearRejectedAppointment = async (req, res) => {
     }
 
     const data = await appointmentModel.clearRejectedAppointment(id);
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'delete',
+      resourceType: 'appointment',
+      resourceId: id,
+    });
+
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
