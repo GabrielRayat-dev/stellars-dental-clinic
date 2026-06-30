@@ -19,27 +19,22 @@ const logAction = async ({ actorId, actorName, actorRole, action, resourceType =
   }
 };
 
-// Get all audit logs (for admin/dentist to view)
-const getAllLogs = async () => {
-  const { data, error } = await supabaseAdmin
+// Get audit logs — admin sees all, others see only their own
+const getAllLogs = async (currentProfile) => {
+  let query = supabaseAdmin
     .from('audit_logs')
     .select('*')
     .order('created_at', { ascending: false });
+
+  if (currentProfile.role !== 'admin') {
+    query = query.eq('actor_id', currentProfile.id);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
   return data;
 };
 
-const getAuditLogs = async (req, res) => {
-  try {
-    const data = await auditModel.getAllLogs();
-    res.status(200).json({
-      message: 'Audit logs retrieved successfully',
-      data,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 module.exports = { logAction, getAllLogs };
