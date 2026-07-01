@@ -1,6 +1,9 @@
 const { supabase, supabaseAdmin } = require('../config/supabase');
 const auditModel = require('../models/audit.model');
 
+const { sendOTPEmail } = require('../config/brevo');
+const otpModel = require('../models/otp.model');
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -197,4 +200,79 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { login, changePassword, logout, getProfile, updateProfile };
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // Check if email exists in profiles — use supabaseAdmin to bypass RLS
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('id, name')
+      .eq('user_id', 
+        (await supabaseAdmin.auth.admin.listUsers()).data.users
+          .find(u => u.email === email)?.id
+      )
+      .single();
+
+    // Always return same response regardless of whether email exists
+    // (email enumeration protection)
+    if (profile) {
+      const otp = await otpModel.createOTP(email);
+      await sendOTPEmail(email, profile.name, otp);
+    }
+
+    res.status(200).json({
+      message: 'If this email exists, an OTP has been sent',
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, new_password } = req.body;
+
+    if (!email || !otp || !new_password) {
+      return res.status(400).json({ message: 'Email, OTP, and new password are required' });
+    }
+
+    if (new_password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+
+    // Verify OTP
+    const isValid = await otpModel.verifyOTP(email, otp);
+    if (!isValid) {
+      return res.status(401).json({ message: 'Invalid or expired OTP' });
+    }
+
+    // Find user by email
+    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    if (listError) throw listError;
+
+    const user = users.find(u => u.email === email);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update password
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+      password: new_password,
+    });
+
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+module.exports = { login, changePassword, logout, getProfile, updateProfile, forgotPassword, resetPassword };
