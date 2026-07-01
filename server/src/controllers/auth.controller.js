@@ -1,7 +1,6 @@
 const { supabase, supabaseAdmin } = require('../config/supabase');
 const auditModel = require('../models/audit.model');
 
-
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -19,7 +18,6 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Use supabaseAdmin to bypass RLS for profile lookup
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({ status: 'logged_in' })
@@ -52,10 +50,9 @@ const login = async (req, res) => {
   }
 };
 
-
 const changePassword = async (req, res) => {
   try {
-    const { new_password } = req.body;
+    const { current_password, new_password } = req.body;
 
     if (!new_password) {
       return res.status(400).json({ message: 'New password is required' });
@@ -63,6 +60,23 @@ const changePassword = async (req, res) => {
 
     if (new_password.length < 8) {
       return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+
+    // Skip current password check if this is a forced first-login change
+    if (!req.profile.must_change_password) {
+      if (!current_password) {
+        return res.status(400).json({ message: 'Current password is required' });
+      }
+
+      // Verify current password
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: req.user.email,
+        password: current_password,
+      });
+
+      if (verifyError) {
+        return res.status(401).json({ message: 'Current password is incorrect' });
+      }
     }
 
     // Update password in Supabase Auth
@@ -74,8 +88,8 @@ const changePassword = async (req, res) => {
       return res.status(500).json({ message: error.message });
     }
 
-    // Flip must_change_password to false
-    const { error: profileError } = await supabase
+    // Fix: use supabaseAdmin to bypass RLS
+    const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({ must_change_password: false, updated_at: new Date() })
       .eq('user_id', req.user.id);
@@ -83,6 +97,15 @@ const changePassword = async (req, res) => {
     if (profileError) {
       return res.status(500).json({ message: 'Error updating profile' });
     }
+
+    await auditModel.logAction({
+      actorId: req.profile.id,
+      actorName: req.profile.name,
+      actorRole: req.profile.role,
+      action: 'update',
+      resourceType: 'profile',
+      resourceId: req.profile.id,
+    });
 
     res.status(200).json({ message: 'Password changed successfully' });
   } catch (error) {
@@ -92,7 +115,6 @@ const changePassword = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    // Update profile status to logged_out
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({ status: 'logged_out' })
@@ -137,7 +159,7 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { new_email, new_password, ...profileData } = req.body;
+    const { new_email, ...profileData } = req.body;
 
     // Update email if provided
     if (new_email) {
@@ -147,20 +169,6 @@ const updateProfile = async (req, res) => {
       );
       if (emailError) {
         return res.status(500).json({ message: emailError.message });
-      }
-    }
-
-    // Update password if provided
-    if (new_password) {
-      if (new_password.length < 8) {
-        return res.status(400).json({ message: 'Password must be at least 8 characters' });
-      }
-      const { error: passwordError } = await supabaseAdmin.auth.admin.updateUserById(
-        req.user.id,
-        { password: new_password }
-      );
-      if (passwordError) {
-        return res.status(500).json({ message: passwordError.message });
       }
     }
 
@@ -188,6 +196,5 @@ const updateProfile = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 module.exports = { login, changePassword, logout, getProfile, updateProfile };
