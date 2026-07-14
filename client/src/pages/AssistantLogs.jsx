@@ -6,22 +6,21 @@ import Header from '../components/Header';
 import { TableWrap, Table } from '../components/Table';
 import SearchBar from '../components/SearchBar';
 import AdminPagination from '../components/AdminPagination';
-import '../styles/Dashboard.css';
+import '../styles/DentistSchedule.css';
 import '../styles/AdminLogs.css';
 
 const ROWS_PER_PAGE = 10;
 
-const AdminLogs = () => {
+const AssistantLogs = () => {
   const navigate = useNavigate();
   const { token } = useAuth();
 
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // Filtering & Pagination
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
   const [page, setPage] = useState(1);
 
   const fetchLogs = useCallback(async () => {
@@ -45,69 +44,51 @@ const AdminLogs = () => {
     fetchLogs();
   }, [fetchLogs]);
 
-  // Derived State: filter logs
+  // Derived State: search filter (role is always 'assistant' via the API)
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
-      const matchesSearch = 
+      return (
         (log.actor_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (log.action || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (log.resource_type || '').toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesRole = roleFilter ? log.actor_role === roleFilter : true;
-      
-      return matchesSearch && matchesRole;
+        (log.resource_type || '').toLowerCase().includes(searchQuery.toLowerCase())
+      );
     });
-  }, [logs, searchQuery, roleFilter]);
+  }, [logs, searchQuery]);
 
   const totalPages = Math.max(1, Math.ceil(filteredLogs.length / ROWS_PER_PAGE));
   const pageLogs = filteredLogs.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE);
 
-  // Reset page to 1 when filters change
-  useEffect(() => {
-    setPage(1);
-  }, [searchQuery, roleFilter]);
+  // Reset page when search changes
+  useEffect(() => { setPage(1); }, [searchQuery]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
     });
   };
 
   return (
-    <main className="dashboard-main">
-      <Header 
-        title={<><ClipboardList size={28} /> Logs</>}
-        subtitle="View system and activity logs."
-        onBack={() => navigate(-1)}
+    <main className="ds-page">
+      <Header
+        title={<><ClipboardList size={28} /> Activity Logs</>}
+        subtitle="View all assistant activity logs"
+        onBack={() => navigate('/dashboard/assistant')}
       />
 
       <div className="al-filters">
-        <SearchBar 
-          value={searchQuery} 
-          onChange={setSearchQuery} 
-          placeholder="Search by name, action, or resource..." 
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by name, action, or resource..."
         />
-        <select 
-          className="al-select" 
-          value={roleFilter} 
-          onChange={(e) => setRoleFilter(e.target.value)}
-        >
-          <option value="">All Roles</option>
-          <option value="admin">Admin</option>
-          <option value="dentist">Dentist</option>
-          <option value="assistant">Assistant</option>
-        </select>
       </div>
 
       <TableWrap>
         {loading ? (
           <div className="al-state">
             <Loader2 size={24} className="al-spin" />
-            <span>Loading audit logs…</span>
+            <span>Loading activity logs…</span>
           </div>
         ) : error ? (
           <div className="al-state al-state--error">
@@ -137,10 +118,10 @@ const AdminLogs = () => {
                 ))
               )}
             </Table>
-            
+
             {filteredLogs.length > 0 && (
-              <AdminPagination 
-                totalItems={filteredLogs.length} 
+              <AdminPagination
+                totalItems={filteredLogs.length}
                 itemName="logs"
                 currentPage={page}
                 totalPages={totalPages}
@@ -154,4 +135,4 @@ const AdminLogs = () => {
   );
 };
 
-export default AdminLogs;
+export default AssistantLogs;

@@ -22,6 +22,8 @@ import DentistPatientDetails from './pages/DentistPatientDetails';
 import DentistServices from './pages/DentistServices';
 import AssistantDashboard from './pages/AssistantDashboard';
 import AssistantSchedule from './pages/AssistantSchedule';
+import AssistantLogs from './pages/AssistantLogs';
+import DentistLogs from './pages/DentistLogs';
 
 function App() {
   return (
@@ -60,6 +62,7 @@ function App() {
             <Route path="patients" element={<DentistPatients />} />
             <Route path="patients/:id" element={<DentistPatientDetails />} />
             <Route path="services" element={<DentistServices />} />
+            <Route path="logs" element={<DentistLogs />} />
           </Route>
 
           {/* Assistant Routes — nested under AssistantLayout */}
@@ -73,6 +76,7 @@ function App() {
           >
             <Route index element={<AssistantDashboard />} />
             <Route path="schedule" element={<AssistantSchedule />} />
+            <Route path="logs" element={<AssistantLogs />} />
           </Route>
 
           {/* Admin Routes — nested under AdminLayout */}

@@ -193,6 +193,7 @@ const deleteDiagnosisRecord = async (req, res) => {
 const addPatientImage = async (req, res) => {
   try {
     const { id, recordId } = req.params; // id = patient id, recordId = diagnosis record id
+    const { label } = req.body; // optional label from form data
 
     if (!recordId) {
       return res.status(400).json({ message: 'recordId is required' });
@@ -233,7 +234,8 @@ const addPatientImage = async (req, res) => {
       recordId,
       urlData.publicUrl,
       file.originalname,
-      req.profile.id
+      req.profile.id,
+      label || null
     );
 
     res.status(201).json({

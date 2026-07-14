@@ -128,19 +128,19 @@ const DentistSchedule = () => {
         <div className="ds-tabs">
           <ButtonWithIcons 
             iconName="Clock" 
-            label="Pending" 
+            label="Pending Requests" 
             active={activeTab === 'pending'} 
             onClick={() => setActiveTab('pending')} 
           />
           <ButtonWithIcons 
             iconName="CheckCircle" 
-            label="Approved" 
+            label="Appointments" 
             active={activeTab === 'approved'} 
             onClick={() => setActiveTab('approved')} 
           />
           <ButtonWithIcons 
             iconName="CalendarPlus" 
-            label="Schedule" 
+            label="Schedule Patient" 
             active={activeTab === 'schedule'} 
             onClick={() => setActiveTab('schedule')} 
           />

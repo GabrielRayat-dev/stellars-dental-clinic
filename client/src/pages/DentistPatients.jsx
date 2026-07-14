@@ -227,14 +227,7 @@ const DentistPatients = () => {
                         style={{ padding: '0.4rem 0.8rem', display: 'flex', gap: '0.3rem', alignItems: 'center' }}
                         onClick={() => navigate(`/dashboard/dentist/patients/${p.id}`, { state: { activeTab: 'Diagnosis' } })}
                       >
-                        Add Record
-                      </button>
-                      <button 
-                        className="ds-action-btn ds-action-btn--approve"
-                        style={{ padding: '0.4rem 0.8rem', display: 'flex', gap: '0.3rem', alignItems: 'center' }}
-                        onClick={() => navigate(`/dashboard/dentist/patients/${p.id}`, { state: { activeTab: 'Images' } })}
-                      >
-                        Upload Image
+                        View Records
                       </button>
                     </div>
                   </td>

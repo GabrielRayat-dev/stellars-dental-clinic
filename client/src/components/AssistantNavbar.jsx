@@ -7,22 +7,35 @@ import {
   ClipboardList,
   ChevronDown,
   LogOut,
+  UserCog,
+  ScrollText,
 } from 'lucide-react';
+import Modal from './Modal';
+import FormInput from './FormInput';
+import Button from './Button';
 import logo from '../assets/logo.jpg';
 import '../styles/Navbar.css';
 
 const assistantNavLinks = [
   { label: 'Dashboard',            path: '/dashboard/assistant',          icon: LayoutDashboard },
   { label: 'Schedule Appointment', path: '/dashboard/assistant/schedule', icon: Calendar        },
+  { label: 'Logs',                 path: '/dashboard/assistant/logs',     icon: ScrollText      },
 ];
 
 const AssistantNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, token, logout } = useAuth();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const profileRef = useRef(null);
+
+  // Update Profile Modal States
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [updateName, setUpdateName] = useState(user?.name || '');
+  const [updatePhone, setUpdatePhone] = useState(user?.phone_number || '');
+  const [updateError, setUpdateError] = useState('');
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -38,6 +51,31 @@ const AssistantNavbar = () => {
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
     : 'AS';
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setUpdateError('');
+    setUpdateLoading(true);
+    try {
+      const res = await fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: updateName, phone_number: updatePhone })
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || 'Failed to update profile');
+      
+      // Reload page to refresh AuthContext and reflect changes
+      window.location.reload(); 
+    } catch (err) {
+      setUpdateError(err.message);
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
 
   return (
     <nav className="navbar">
@@ -93,14 +131,60 @@ const AssistantNavbar = () => {
             </div>
             <button
               className="navbar__dropdown-item"
+              style={{ color: 'var(--primary-green)', fontWeight: 600 }}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                setUpdateName(user?.name || '');
+                setUpdatePhone(user?.phone_number || '');
+                setUpdateError('');
+                setIsUpdateModalOpen(true);
+                setDropdownOpen(false);
+              }}
+            >
+              <UserCog size={14} />
+              Update Profile
+            </button>
+            <button
+              className="navbar__dropdown-item"
+              style={{ background: 'var(--error-red)', color: '#fff', marginTop: '0.25rem', borderRadius: '4px' }}
               onClick={(e) => { e.stopPropagation(); logout(); }}
             >
-              <LogOut size={14} />
+              <LogOut size={14} color="#fff" />
               Sign out
             </button>
           </div>
         )}
       </div>
+
+      {/* Update Profile Modal */}
+      {isUpdateModalOpen && (
+        <Modal title="Update Profile" onClose={() => setIsUpdateModalOpen(false)}>
+          <form style={{ padding: '1rem' }} onSubmit={handleUpdateProfile}>
+            {updateError && (
+              <div style={{ color: '#d32f2f', marginBottom: '1rem', background: '#ffebee', padding: '0.75rem', borderRadius: '4px', fontSize: '0.875rem' }}>
+                {updateError}
+              </div>
+            )}
+            <FormInput
+              label="Full Name"
+              value={updateName}
+              onChange={(e) => setUpdateName(e.target.value)}
+              required
+            />
+            <div style={{ marginTop: '1rem' }} />
+            <FormInput
+              label="Phone Number"
+              value={updatePhone}
+              onChange={(e) => setUpdatePhone(e.target.value)}
+            />
+            <div style={{ marginTop: '1.5rem' }}>
+              <Button type="submit" variant="primary" style={{ width: '100%' }} disabled={updateLoading}>
+                {updateLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </nav>
   );
 };

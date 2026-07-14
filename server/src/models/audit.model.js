@@ -19,16 +19,19 @@ const logAction = async ({ actorId, actorName, actorRole, action, resourceType =
   }
 };
 
-// Get audit logs — admin sees all, others see only their own
+// Get audit logs — admin sees all, dentist sees dentist+assistant, assistant sees assistant only
 const getAllLogs = async (currentProfile) => {
   let query = supabaseAdmin
     .from('audit_logs')
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (currentProfile.role !== 'admin') {
-    query = query.eq('actor_id', currentProfile.id);
+  if (currentProfile.role === 'dentist') {
+    query = query.in('actor_role', ['dentist', 'assistant']);
+  } else if (currentProfile.role === 'assistant') {
+    query = query.eq('actor_role', 'assistant');
   }
+  // admin: no filter — sees everything
 
   const { data, error } = await query;
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  User, Activity, Image as ImageIcon, Loader2, AlertCircle
+  User, Activity, Image as ImageIcon, Loader2, AlertCircle, Trash2, X
 } from 'lucide-react';
 import Header from '../components/Header';
 import ButtonWithIcons from '../components/ButtonWithIcons';
@@ -21,7 +21,7 @@ const DentistPatientDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'Profile'); // Profile | Diagnosis | Images
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab === 'Profile' ? 'Profile' : 'Diagnosis');
 
   // Modals & Forms
   const [showDiagnosisModal, setShowDiagnosisModal] = useState(false);
@@ -32,6 +32,7 @@ const DentistPatientDetails = () => {
 
   const [showImageModal, setShowImageModal] = useState(false);
   const [imageFile, setImageFile] = useState(null);
+  const [uploadTargetRecordId, setUploadTargetRecordId] = useState(null);
 
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
@@ -40,7 +41,9 @@ const DentistPatientDetails = () => {
 
   // Selection state
   const [selectedDiagnosisId, setSelectedDiagnosisId] = useState(null);
-  const [selectedImageId, setSelectedImageId] = useState(null);
+  
+  // Fullscreen Image Lightbox
+  const [fullscreenImage, setFullscreenImage] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -70,8 +73,9 @@ const DentistPatientDetails = () => {
   // Handle incoming location state for auto-opening tabs
   useEffect(() => {
     if (location.state?.activeTab) {
-      setActiveTab(location.state.activeTab);
-      // Clear the state so it doesn't persist if the user refreshes
+      // Since we removed 'Images' tab, map it to Diagnosis
+      const tab = location.state.activeTab === 'Images' ? 'Diagnosis' : location.state.activeTab;
+      setActiveTab(tab);
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -133,7 +137,7 @@ const DentistPatientDetails = () => {
   // Image Handlers
   const handleImageSubmit = async (e) => {
     e.preventDefault();
-    if (!imageFile) return;
+    if (!imageFile || !uploadTargetRecordId) return;
     
     setFormSubmitting(true);
     setFormError('');
@@ -142,7 +146,7 @@ const DentistPatientDetails = () => {
     formData.append('image', imageFile);
 
     try {
-      const res = await fetch(`/api/patients/${id}/images`, {
+      const res = await fetch(`/api/patients/${id}/diagnosis/${uploadTargetRecordId}/images`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }, // fetch handles boundary for FormData
         body: formData
@@ -153,6 +157,7 @@ const DentistPatientDetails = () => {
       await fetchData();
       setShowImageModal(false);
       setImageFile(null);
+      setUploadTargetRecordId(null);
     } catch (err) {
       setFormError(err.message);
     } finally {
@@ -194,7 +199,20 @@ const DentistPatientDetails = () => {
         onBack={() => navigate('/dashboard/dentist/patients')}
       />
 
-
+      <div style={{ display: 'flex', gap: '1rem', padding: '0 2rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-light)' }}>
+        <button 
+          onClick={() => setActiveTab('Profile')} 
+          style={{ padding: '1rem 0.5rem', background: 'none', border: 'none', borderBottom: activeTab === 'Profile' ? '2px solid var(--primary-green)' : '2px solid transparent', color: activeTab === 'Profile' ? 'var(--primary-green)' : 'var(--text-muted)', fontWeight: activeTab === 'Profile' ? 600 : 400, cursor: 'pointer', transition: 'all 0.2s' }}
+        >
+          Personal Info
+        </button>
+        <button 
+          onClick={() => setActiveTab('Diagnosis')} 
+          style={{ padding: '1rem 0.5rem', background: 'none', border: 'none', borderBottom: activeTab === 'Diagnosis' ? '2px solid var(--primary-green)' : '2px solid transparent', color: activeTab === 'Diagnosis' ? 'var(--primary-green)' : 'var(--text-muted)', fontWeight: activeTab === 'Diagnosis' ? 600 : 400, cursor: 'pointer', transition: 'all 0.2s' }}
+        >
+          Diagnosis & Records
+        </button>
+      </div>
 
       <div style={{ padding: '0 2rem' }}>
         {/* ── PROFILE TAB ── */}
@@ -231,7 +249,7 @@ const DentistPatientDetails = () => {
               />
               <ButtonWithIcons
                 iconName="Edit2"
-                label="Edit"
+                label="Edit Record"
                 variant="gold"
                 disabled={!selectedDiagnosisId}
                 onClick={() => {
@@ -241,7 +259,7 @@ const DentistPatientDetails = () => {
               />
               <ButtonWithIcons
                 iconName="Trash2"
-                label="Delete"
+                label="Delete Record"
                 variant="danger"
                 disabled={!selectedDiagnosisId}
                 onClick={() => setItemToDelete({ type: 'diagnosis', recordId: selectedDiagnosisId })}
@@ -253,79 +271,90 @@ const DentistPatientDetails = () => {
                   <tr><td colSpan="5" className="st-table__empty">No diagnosis records found.</td></tr>
                 ) : (
                   patient.diagnosis_records.sort((a,b) => new Date(b.date) - new Date(a.date)).map(record => (
-                    <tr 
-                      key={record.id}
-                      className={selectedDiagnosisId === record.id ? 'st-table__row--selected' : ''}
-                      onClick={() => setSelectedDiagnosisId(record.id === selectedDiagnosisId ? null : record.id)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{new Date(record.date).toLocaleDateString()}</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{record.time}</div>
-                      </td>
-                      <td style={{ maxWidth: '200px' }}>{record.chief_complaint?.name || record.chief_complaint || 'N/A'}</td>
-                      <td style={{ maxWidth: '200px' }}>{record.diagnosis}</td>
-                      <td style={{ maxWidth: '200px' }}>{record.treatment}</td>
-                      <td>
-                        <div style={{ color: 'var(--primary-green)', fontWeight: 600 }}>₱{record.amount_paid}</div>
-                        <div style={{ fontSize: '0.8rem', color: record.balance > 0 ? 'var(--error-red)' : 'var(--text-muted)' }}>Bal: ₱{record.balance}</div>
-                      </td>
-                    </tr>
+                    <React.Fragment key={record.id}>
+                      <tr 
+                        className={selectedDiagnosisId === record.id ? 'st-table__row--selected' : ''}
+                        onClick={() => setSelectedDiagnosisId(record.id === selectedDiagnosisId ? null : record.id)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{new Date(record.date).toLocaleDateString()}</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{record.time}</div>
+                        </td>
+                        <td style={{ maxWidth: '200px' }}>{record.chief_complaint?.name || record.chief_complaint || 'N/A'}</td>
+                        <td style={{ maxWidth: '200px' }}>{record.diagnosis}</td>
+                        <td style={{ maxWidth: '200px' }}>{record.treatment}</td>
+                        <td>
+                          <div style={{ color: 'var(--primary-green)', fontWeight: 600 }}>₱{record.amount_paid}</div>
+                          <div style={{ fontSize: '0.8rem', color: record.balance > 0 ? 'var(--error-red)' : 'var(--text-muted)' }}>Bal: ₱{record.balance}</div>
+                        </td>
+                      </tr>
+                      {/* Accordion Content (Images) */}
+                      {selectedDiagnosisId === record.id && (
+                        <tr style={{ backgroundColor: '#fafafa' }}>
+                          <td colSpan="5" style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-light)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                              <h4 style={{ margin: 0, color: 'var(--text-dark)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <ImageIcon size={18} /> Images & X-Rays for this visit
+                              </h4>
+                              <ButtonWithIcons
+                                iconName="Upload"
+                                label="Upload Image"
+                                variant="default"
+                                onClick={() => { 
+                                  setImageFile(null); 
+                                  setFormError(''); 
+                                  setUploadTargetRecordId(record.id);
+                                  setShowImageModal(true); 
+                                }}
+                              />
+                            </div>
+                            
+                            {(!record.patient_images || record.patient_images.length === 0) ? (
+                              <div style={{ padding: '2rem', textAlign: 'center', background: '#fff', border: '1px dashed var(--border-light)', color: 'var(--text-muted)' }}>
+                                No images or X-rays uploaded for this diagnosis record yet.
+                              </div>
+                            ) : (
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>
+                                {record.patient_images.map(img => (
+                                  <div 
+                                    key={img.id} 
+                                    style={{ 
+                                      border: '1px solid var(--border-light)', 
+                                      borderRadius: '8px', overflow: 'hidden', background: '#fff', 
+                                      display: 'flex', flexDirection: 'column'
+                                    }}
+                                  >
+                                    <div 
+                                      onClick={() => setFullscreenImage(img.file_url)}
+                                      style={{ cursor: 'pointer', display: 'block', height: '140px', background: '#f5f5f5', overflow: 'hidden' }}
+                                    >
+                                      <img src={img.file_url} alt={img.file_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    </div>
+                                    <div style={{ padding: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80%' }} title={img.file_name}>
+                                        {img.file_name}
+                                      </span>
+                                      <button 
+                                        onClick={() => setItemToDelete({ type: 'image', recordId: img.id })}
+                                        style={{ background: 'none', border: 'none', color: 'var(--error-red)', cursor: 'pointer', padding: '0.2rem' }}
+                                        title="Delete Image"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))
                 )}
               </Table>
             </TableWrap>
-          </div>
-        )}
-
-        {/* ── IMAGES TAB ── */}
-        {activeTab === 'Images' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginBottom: '1rem' }}>
-              <ButtonWithIcons
-                iconName="Upload"
-                label="Upload Image"
-                variant="default"
-                onClick={() => { setImageFile(null); setFormError(''); setShowImageModal(true); }}
-              />
-              <ButtonWithIcons
-                iconName="Trash2"
-                label="Delete"
-                variant="danger"
-                disabled={!selectedImageId}
-                onClick={() => setItemToDelete({ type: 'image', recordId: selectedImageId })}
-              />
-            </div>
-            
-            {(!patient.patient_images || patient.patient_images.length === 0) ? (
-              <div style={{ padding: '3rem', textAlign: 'center', background: '#fff', border: '1px dashed var(--border-light)', color: 'var(--text-muted)' }}>
-                No images or X-rays uploaded yet.
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-                {patient.patient_images.map(img => (
-                  <div 
-                    key={img.id} 
-                    onClick={() => setSelectedImageId(img.id === selectedImageId ? null : img.id)}
-                    style={{ 
-                      border: `2px solid ${selectedImageId === img.id ? 'var(--primary-green)' : 'var(--border-light)'}`, 
-                      borderRadius: '8px', overflow: 'hidden', background: '#fff', 
-                      display: 'flex', flexDirection: 'column', cursor: 'pointer',
-                      boxShadow: selectedImageId === img.id ? '0 0 0 2px rgba(61,118,85,0.2)' : 'none'
-                    }}
-                  >
-                    <a href={img.file_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ display: 'block', height: '150px', background: '#f5f5f5', overflow: 'hidden' }}>
-                      <img src={img.file_url} alt={img.file_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    </a>
-                    <div style={{ padding: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={img.file_name}>
-                        {img.file_name}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -422,6 +451,32 @@ const DentistPatientDetails = () => {
           onConfirm={confirmDelete}
           onCancel={() => setItemToDelete(null)}
         />
+      )}
+
+      {/* ── Fullscreen Image Modal (Lightbox) ── */}
+      {fullscreenImage && (
+        <div 
+          onClick={() => setFullscreenImage(null)}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999,
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+            cursor: 'zoom-out'
+          }}
+        >
+          <button 
+            onClick={() => setFullscreenImage(null)}
+            style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}
+          >
+            <X size={32} />
+          </button>
+          <img 
+            src={fullscreenImage} 
+            alt="Fullscreen View" 
+            style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain', borderRadius: '4px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }} 
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image itself
+          />
+        </div>
       )}
     </main>
   );

@@ -1,0 +1,72 @@
+.al-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.al-select {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+  min-width: 150px;
+}
+
+.al-select:focus {
+  border-color: var(--primary-green);
+}
+
+.al-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  gap: 0.75rem;
+}
+
+.al-state--error {
+  color: #d32f2f;
+}
+
+.al-spin {
+  animation: al-spin 1s linear infinite;
+}
+
+@keyframes al-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.al-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
+}
+
+.al-badge--admin {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.al-badge--dentist {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.al-badge--assistant {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
