@@ -35,6 +35,9 @@ app.use('/api/public', publicRoutes);
 const auditRoutes = require('./routes/audit.routes');
 app.use('/api/audit-logs', auditRoutes);
 
+const statsRoutes = require('./routes/stats.routes');
+app.use('/api/stats', statsRoutes);
+
 // Test route
 app.get('/', (req, res) => {
   res.json({ message: 'Stellars Dental API is running' });
