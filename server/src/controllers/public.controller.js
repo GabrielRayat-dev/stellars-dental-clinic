@@ -92,6 +92,19 @@ const getClinicInformation = async (req, res) => {
   }
 };
 
+// Get public dentist list — public
+const getPublicDentists = async (req, res) => {
+  try {
+    const data = await publicModel.getPublicDentists();
+    res.status(200).json({
+      message: 'Dentists retrieved successfully',
+      data,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Update clinic information — admin
 const updateClinicInformation = async (req, res) => {
   try {
@@ -117,4 +130,5 @@ module.exports = {
   deleteFaq,
   getClinicInformation,
   updateClinicInformation,
-};
+  getPublicDentists,
+};

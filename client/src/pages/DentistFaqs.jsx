@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Loader2, AlertCircle, Power, PowerOff } from 'lucide-react';
+import { MessageCircleQuestion, Loader2, AlertCircle, Power, PowerOff } from 'lucide-react';
 import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
 import { TableWrap, Table } from '../components/Table';
@@ -11,12 +11,12 @@ import ButtonWithIcons from '../components/ButtonWithIcons';
 import { useAuth } from '../context/AuthContext';
 import '../styles/DentistSchedule.css'; // Reusing layout styles
 
-const DentistServices = () => {
+const DentistFaqs = () => {
   const navigate = useNavigate();
   const { token } = useAuth();
 
   // Data
-  const [services, setServices] = useState([]);
+  const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -28,25 +28,25 @@ const DentistServices = () => {
 
   // Modals
   const [showFormModal, setShowFormModal] = useState(false);
-  const [editingService, setEditingService] = useState(null);
-  const [form, setForm] = useState({ name: '', description: '' });
+  const [editingFaq, setEditingFaq] = useState(null);
+  const [form, setForm] = useState({ question: '', answer: '', is_active: true });
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
-  const [pendingAction, setPendingAction] = useState(null); // { type: 'toggle', service: object }
+  const [pendingAction, setPendingAction] = useState(null); // { type: 'toggle', faq: object }
   const [actionLoading, setActionLoading] = useState(false);
   
-  const [serviceToDelete, setServiceToDelete] = useState(null);
+  const [faqToDelete, setFaqToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const fetchServices = useCallback(async () => {
+  const fetchFaqs = useCallback(async () => {
     try {
-      const res = await fetch('/api/services', {
+      const res = await fetch('/api/public/faqs/all', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.message || 'Failed to fetch services');
-      setServices(json.data || []);
+      if (!res.ok) throw new Error(json.message || 'Failed to fetch FAQs');
+      setFaqs(json.data || []);
     } catch (err) {
       setError(err.message);
     }
@@ -55,33 +55,34 @@ const DentistServices = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await fetchServices();
+      await fetchFaqs();
       setLoading(false);
     };
     loadData();
-  }, [fetchServices]);
+  }, [fetchFaqs]);
 
   // Derived Data
-  const filteredServices = services.filter(s => {
+  const filteredFaqs = faqs.filter(f => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
-    return s.name?.toLowerCase().includes(q) || s.description?.toLowerCase().includes(q);
+    return f.question?.toLowerCase().includes(q) || f.answer?.toLowerCase().includes(q);
   });
 
-  const totalPages = Math.ceil(filteredServices.length / ITEMS_PER_PAGE) || 1;
-  const paginatedServices = filteredServices.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredFaqs.length / ITEMS_PER_PAGE) || 1;
+  const paginatedFaqs = filteredFaqs.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   // Form Handlers
   const handleAddClick = () => {
-    setEditingService(null);
-    setForm({ name: '', description: '' });
+    setEditingFaq(null);
+    setForm({ question: '', answer: '', is_active: true });
     setFormError('');
     setShowFormModal(true);
   };
 
-  const handleEditClick = (service) => {
-    setEditingService(service);
-    setForm({ name: service.name, description: service.description || '' });
+  const handleEditClick = (faq) => {
+    if (!faq) return;
+    setEditingFaq(faq);
+    setForm({ question: faq.question, answer: faq.answer, is_active: faq.is_active });
     setFormError('');
     setShowFormModal(true);
   };
@@ -92,8 +93,8 @@ const DentistServices = () => {
     setFormError('');
 
     try {
-      const url = editingService ? `/api/services/${editingService.id}` : '/api/services';
-      const method = editingService ? 'PUT' : 'POST';
+      const url = editingFaq ? `/api/public/faqs/${editingFaq.id}` : '/api/public/faqs';
+      const method = editingFaq ? 'PUT' : 'POST';
       
       const res = await fetch(url, {
         method,
@@ -101,10 +102,11 @@ const DentistServices = () => {
         body: JSON.stringify(form)
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.message || 'Failed to save service');
+      if (!res.ok) throw new Error(json.message || 'Failed to save FAQ');
       
-      await fetchServices();
+      await fetchFaqs();
       setShowFormModal(false);
+      setSelectedId(null);
     } catch (err) {
       setFormError(err.message);
     } finally {
@@ -113,19 +115,19 @@ const DentistServices = () => {
   };
 
   // Toggle Action
-  const requestToggle = (service) => setPendingAction({ type: 'toggle', service });
+  const requestToggle = (faq) => setPendingAction({ type: 'toggle', faq });
 
   const confirmAction = async () => {
     if (!pendingAction) return;
     setActionLoading(true);
-    const { service } = pendingAction;
+    const { faq } = pendingAction;
     try {
-      const res = await fetch(`/api/services/${service.id}/toggle`, {
-        method: 'PATCH',
+      const res = await fetch(`/api/public/faqs/${faq.id}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ is_active: !service.is_active })
+        body: JSON.stringify({ question: faq.question, answer: faq.answer, is_active: !faq.is_active })
       });
-      if (res.ok) await fetchServices();
+      if (res.ok) await fetchFaqs();
     } catch (err) {
       console.error('Toggle error:', err);
     } finally {
@@ -135,41 +137,44 @@ const DentistServices = () => {
   };
 
   const confirmDelete = async () => {
-    if (!serviceToDelete) return;
+    if (!faqToDelete) return;
     setDeleteLoading(true);
     try {
-      const res = await fetch(`/api/services/${serviceToDelete.id}`, {
+      const res = await fetch(`/api/public/faqs/${faqToDelete.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (res.ok) await fetchServices();
+      if (res.ok) {
+        await fetchFaqs();
+        setSelectedId(null);
+      }
     } catch (err) {
       console.error('Delete error:', err);
     } finally {
       setDeleteLoading(false);
-      setServiceToDelete(null);
+      setFaqToDelete(null);
     }
   };
 
   return (
     <main className="ds-page">
       <Header 
-        title={<><Activity size={28} /> Services Management</>}
-        subtitle="view, add, edit, and manage clinic services"
+        title={<><MessageCircleQuestion size={28} /> FAQ Management</>}
+        subtitle="view, add, edit, and manage public frequently asked questions"
         onBack={() => navigate('/dashboard/dentist')}
-        onForward={() => navigate('/dashboard/dentist/faqs')}
+        onForward={() => navigate('/dashboard/dentist/logs')}
       />
       
       <div className="ds-controls">
         <SearchBar 
           value={searchQuery}
           onChange={(val) => { setSearchQuery(val); setPage(1); }}
-          placeholder="search services..."
+          placeholder="search questions or answers..."
         />
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <ButtonWithIcons
             iconName="Plus"
-            label="Add Service"
+            label="Add FAQ"
             variant="default"
             onClick={handleAddClick}
           />
@@ -177,14 +182,14 @@ const DentistServices = () => {
             iconName="Edit2"
             label="Edit"
             variant="gold"
-            onClick={() => handleEditClick(services.find(s => s.id === selectedId))}
+            onClick={() => handleEditClick(faqs.find(f => f.id === selectedId))}
             disabled={!selectedId}
           />
           <ButtonWithIcons
             iconName="Trash2"
             label="Delete"
             variant="danger"
-            onClick={() => setServiceToDelete(services.find(s => s.id === selectedId))}
+            onClick={() => setFaqToDelete(faqs.find(f => f.id === selectedId))}
             disabled={!selectedId}
           />
         </div>
@@ -200,39 +205,41 @@ const DentistServices = () => {
         </div>
       ) : (
         <TableWrap>
-          <Table headers={['Service Name', 'Description', 'Status', 'Date Created', 'Actions']}>
-            {paginatedServices.length === 0 ? (
-              <tr><td colSpan="5" className="st-table__empty">No services found.</td></tr>
+          <Table headers={['Question', 'Answer', 'Status', 'Date Created', 'Actions']}>
+            {paginatedFaqs.length === 0 ? (
+              <tr><td colSpan="5" className="st-table__empty">No FAQs found.</td></tr>
             ) : (
-              paginatedServices.map(s => (
+              paginatedFaqs.map(f => (
                 <tr 
-                  key={s.id}
-                  className={selectedId === s.id ? 'st-table__row--selected' : ''}
-                  onClick={() => setSelectedId(s.id === selectedId ? null : s.id)}
+                  key={f.id}
+                  className={selectedId === f.id ? 'st-table__row--selected' : ''}
+                  onClick={() => setSelectedId(f.id === selectedId ? null : f.id)}
                   style={{ cursor: 'pointer' }}
                 >
-                  <td style={{ fontWeight: 600 }}>{s.name}</td>
-                  <td style={{ maxWidth: '300px' }}>{s.description || <span style={{ color: 'var(--text-muted)' }}>No description</span>}</td>
+                  <td style={{ fontWeight: 600, maxWidth: '250px' }}>{f.question}</td>
+                  <td style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {f.answer || <span style={{ color: 'var(--text-muted)' }}>No answer</span>}
+                  </td>
                   <td>
                     <span style={{
                       display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
                       padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
-                      background: s.is_active ? 'rgba(61,118,85,0.1)' : 'rgba(217,83,79,0.1)',
-                      color: s.is_active ? 'var(--primary-green)' : 'var(--error-red)'
+                      background: f.is_active ? 'rgba(61,118,85,0.1)' : 'rgba(217,83,79,0.1)',
+                      color: f.is_active ? 'var(--primary-green)' : 'var(--error-red)'
                     }}>
-                      {s.is_active ? 'Active' : 'Inactive'}
+                      {f.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td>{new Date(s.created_at).toLocaleDateString()}</td>
+                  <td>{new Date(f.created_at).toLocaleDateString()}</td>
                   <td>
                     <div className="ds-action-btns" onClick={(e) => e.stopPropagation()}>
                       <button 
-                        className={`ds-action-btn ${s.is_active ? 'ds-action-btn--reject' : 'ds-action-btn--approve'}`}
+                        className={`ds-action-btn ${f.is_active ? 'ds-action-btn--reject' : 'ds-action-btn--approve'}`}
                         style={{ padding: '0.4rem 0.8rem', display: 'flex', gap: '0.3rem', alignItems: 'center' }}
-                        onClick={() => requestToggle(s)}
+                        onClick={() => requestToggle(f)}
                       >
-                        {s.is_active ? <PowerOff size={14} /> : <Power size={14} />} 
-                        {s.is_active ? 'Deactivate' : 'Activate'}
+                        {f.is_active ? <PowerOff size={14} /> : <Power size={14} />} 
+                        {f.is_active ? 'Hide' : 'Show'}
                       </button>
                     </div>
                   </td>
@@ -240,10 +247,10 @@ const DentistServices = () => {
               ))
             )}
           </Table>
-          {filteredServices.length > 0 && (
+          {filteredFaqs.length > 0 && (
             <AdminPagination 
-              totalItems={filteredServices.length} 
-              itemName="services"
+              totalItems={filteredFaqs.length} 
+              itemName="faqs"
               currentPage={page}
               totalPages={totalPages}
               onPageChange={setPage}
@@ -255,31 +262,32 @@ const DentistServices = () => {
       {/* ── Add/Edit Modal ── */}
       {showFormModal && (
         <Modal 
-          title={editingService ? 'Edit Service' : 'Add New Service'} 
+          title={editingFaq ? 'Edit FAQ' : 'Add New FAQ'} 
           onClose={() => !formSubmitting && setShowFormModal(false)}
         >
           <form onSubmit={submitForm} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '0 1.5rem 1.5rem' }}>
             {formError && <div style={{ color: 'var(--error-red)', fontSize: '0.9rem' }}><AlertCircle size={15}/> {formError}</div>}
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)' }}>Service Name</label>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)' }}>Question</label>
               <input 
                 type="text" 
-                value={form.name} 
-                onChange={(e) => setForm({ ...form, name: e.target.value })} 
+                value={form.question} 
+                onChange={(e) => setForm({ ...form, question: e.target.value })} 
                 required 
-                placeholder="e.g. Tooth Extraction"
+                placeholder="e.g. Do you offer teeth whitening?"
                 style={{ padding: '0.65rem', border: '1px solid var(--border-light)', outline: 'none' }}
               />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)' }}>Description (Optional)</label>
+              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)' }}>Answer</label>
               <textarea 
-                value={form.description} 
-                onChange={(e) => setForm({ ...form, description: e.target.value })} 
-                rows={3}
-                placeholder="Brief description of the service..."
+                value={form.answer} 
+                onChange={(e) => setForm({ ...form, answer: e.target.value })} 
+                required
+                rows={4}
+                placeholder="Provide a clear, helpful answer..."
                 style={{ padding: '0.65rem', border: '1px solid var(--border-light)', outline: 'none', resize: 'vertical' }}
               />
             </div>
@@ -292,7 +300,7 @@ const DentistServices = () => {
                 color: '#fff', border: 'none', fontWeight: 600, cursor: formSubmitting ? 'not-allowed' : 'pointer', opacity: formSubmitting ? 0.7 : 1
               }}
             >
-              {formSubmitting ? 'Saving...' : 'Save Service'}
+              {formSubmitting ? 'Saving...' : 'Save FAQ'}
             </button>
           </form>
         </Modal>
@@ -301,32 +309,33 @@ const DentistServices = () => {
       {/* ── Toggle Confirmation Modal ── */}
       {pendingAction && (
         <ModalConfirmation
-          title={pendingAction.service.is_active ? 'Deactivate Service?' : 'Activate Service?'}
-          message={`Are you sure you want to ${pendingAction.service.is_active ? 'deactivate' : 'activate'} the service "${pendingAction.service.name}"? ${pendingAction.service.is_active ? 'It will no longer appear as an option for patients.' : 'It will become available for patients to select.'}`}
-          confirmText={pendingAction.service.is_active ? 'Yes, Deactivate' : 'Yes, Activate'}
+          title={pendingAction.faq.is_active ? 'Hide FAQ?' : 'Show FAQ?'}
+          message={`Are you sure you want to ${pendingAction.faq.is_active ? 'hide' : 'show'} this FAQ? ${pendingAction.faq.is_active ? 'It will no longer appear on the public landing page.' : 'It will become visible on the public landing page.'}`}
+          confirmText={pendingAction.faq.is_active ? 'Yes, Hide' : 'Yes, Show'}
           cancelText="Cancel"
           loading={actionLoading}
-          danger={pendingAction.service.is_active}
+          danger={pendingAction.faq.is_active}
           onConfirm={confirmAction}
           onCancel={() => setPendingAction(null)}
         />
       )}
 
       {/* ── Delete Confirmation Modal ── */}
-      {serviceToDelete && (
+      {faqToDelete && (
         <ModalConfirmation
-          title="Delete Service?"
-          message={`Are you sure you want to permanently delete "${serviceToDelete.name}"? This action cannot be undone.`}
+          title="Delete FAQ?"
+          message={`Are you sure you want to permanently delete this FAQ? This action cannot be undone.`}
           confirmText="Yes, Delete"
           cancelText="Cancel"
           loading={deleteLoading}
           danger={true}
           onConfirm={confirmDelete}
-          onCancel={() => setServiceToDelete(null)}
+          onCancel={() => setFaqToDelete(null)}
         />
       )}
     </main>
   );
 };
 
-export default DentistServices;
+export default DentistFaqs;
+

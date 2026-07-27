@@ -20,6 +20,7 @@ import DentistSchedule from './pages/DentistSchedule';
 import DentistPatients from './pages/DentistPatients';
 import DentistPatientDetails from './pages/DentistPatientDetails';
 import DentistServices from './pages/DentistServices';
+import DentistFaqs from './pages/DentistFaqs';
 import AssistantDashboard from './pages/AssistantDashboard';
 import AssistantSchedule from './pages/AssistantSchedule';
 import AssistantLogs from './pages/AssistantLogs';
@@ -62,6 +63,7 @@ function App() {
             <Route path="patients" element={<DentistPatients />} />
             <Route path="patients/:id" element={<DentistPatientDetails />} />
             <Route path="services" element={<DentistServices />} />
+            <Route path="faqs" element={<DentistFaqs />} />
             <Route path="logs" element={<DentistLogs />} />
           </Route>
 

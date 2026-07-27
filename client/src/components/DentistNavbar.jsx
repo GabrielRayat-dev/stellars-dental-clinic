@@ -10,6 +10,7 @@ import {
   Activity,
   UserCog,
   ScrollText,
+  MessageCircleQuestion,
 } from 'lucide-react';
 import Modal from './Modal';
 import FormInput from './FormInput';
@@ -22,6 +23,7 @@ const dentistNavLinks = [
   { label: 'Schedule Appointment', path: '/dashboard/dentist/schedule', icon: Calendar        },
   { label: 'Patient Record',       path: '/dashboard/dentist/patients', icon: ClipboardList   },
   { label: 'Services',             path: '/dashboard/dentist/services', icon: Activity        },
+  { label: 'FAQs',                 path: '/dashboard/dentist/faqs',     icon: MessageCircleQuestion },
   { label: 'Logs',                 path: '/dashboard/dentist/logs',     icon: ScrollText      },
 ];
 

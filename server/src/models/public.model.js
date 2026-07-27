@@ -92,6 +92,19 @@ const updateClinicInformation = async (clinicData) => {
   return data;
 };
 
+// Get public dentist list (public)
+const getPublicDentists = async () => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, name, email, phone_number, role')
+    .in('role', ['dentist', 'assistant'])
+    .eq('status', true)
+    .order('name', { ascending: true });
+
+  if (error) throw error;
+  return data;
+};
+
 module.exports = {
   getActiveFaqs,
   getAllFaqs,
@@ -100,4 +113,5 @@ module.exports = {
   deleteFaq,
   getClinicInformation,
   updateClinicInformation,
-};
+  getPublicDentists,
+};

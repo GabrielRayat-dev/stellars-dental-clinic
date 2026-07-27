@@ -42,11 +42,12 @@
 
 .admin-pagination__btn:hover:not(:disabled) {
   background-color: var(--primary-green-hover);
-  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(39, 128, 78, 0.35);
 }
 
 .admin-pagination__btn:active:not(:disabled) {
-  transform: scale(0.95);
+  box-shadow: none;
+  opacity: 0.85;
 }
 
 .admin-pagination__btn:disabled {

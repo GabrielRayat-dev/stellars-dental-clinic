@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Modal from './Modal';
 import ModalConfirmation from './ModalConfirmation';
 import { useAuth } from '../context/AuthContext';
@@ -10,9 +10,13 @@ const TIME_SLOTS = [
   '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'
 ];
 
-const ScheduleForm = ({ onSuccess }) => {
+const ScheduleForm = ({ onSuccess, publicMode = false }) => {
   const { token } = useAuth();
   const [services, setServices] = useState([]);
+
+  // Success state (public mode shows tracking number)
+  const [submitted, setSubmitted] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState('');
   
   // Form State
   const emptyForm = {
@@ -55,9 +59,9 @@ const ScheduleForm = ({ onSuccess }) => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch('/api/services', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const url = publicMode ? '/api/services/public' : '/api/services';
+        const headers = publicMode ? {} : { Authorization: `Bearer ${token}` };
+        const res = await fetch(url, { headers });
         const json = await res.json();
         if (res.ok && json.data) {
           setServices(json.data);
@@ -67,7 +71,7 @@ const ScheduleForm = ({ onSuccess }) => {
       }
     };
     fetchServices();
-  }, [token]);
+  }, [token, publicMode]);
 
   const handleScroll = () => {
     if (!dateScrollRef.current) return;
@@ -269,16 +273,26 @@ const ScheduleForm = ({ onSuccess }) => {
     setFormError('');
 
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (!publicMode && token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/appointments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers,
         body: JSON.stringify(form)
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || 'Failed to create appointment');
-      
+
       setForm(emptyForm);
-      if (onSuccess) onSuccess();
+
+      if (publicMode) {
+        // Show inline success with tracking number instead of calling onSuccess
+        setTrackingNumber(json.data?.tracking_number || json.data?.id || '');
+        setSubmitted(true);
+      } else {
+        if (onSuccess) onSuccess();
+      }
     } catch (err) {
       setFormError(err.message);
     } finally {
@@ -286,11 +300,37 @@ const ScheduleForm = ({ onSuccess }) => {
     }
   };
 
+  if (submitted && publicMode) {
+    return (
+      <div className="sf-container">
+        <div className="sf-card">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '1rem 0' }}>
+            <CheckCircle2 size={52} color="var(--primary-green)" />
+            <h2 className="sf-title">Appointment Submitted!</h2>
+            <p className="sf-subtitle" style={{ marginBottom: 0 }}>Your appointment request has been received. We'll confirm it shortly.</p>
+            {trackingNumber && (
+              <div style={{ background: 'var(--primary-green-light)', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '0.6rem 1.5rem', fontSize: '0.9rem', color: 'var(--text-dark)' }}>
+                Tracking #: <strong>{trackingNumber}</strong>
+              </div>
+            )}
+            <button
+              className="sf-submit-btn"
+              style={{ marginTop: '0.5rem', maxWidth: '220px' }}
+              onClick={() => { setSubmitted(false); setTrackingNumber(''); }}
+            >
+              Book Another
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="sf-container">
       <div className="sf-card">
-        <h2 className="sf-title">Schedule a Patient</h2>
-        <p className="sf-subtitle">Please enter the patient's name, phone number, service, and its date and time!</p>
+        <h2 className="sf-title">{publicMode ? 'Book an Appointment' : 'Schedule a Patient'}</h2>
+        <p className="sf-subtitle">{publicMode ? 'Fill in your details, choose a date and time, and we\'ll confirm your appointment.' : "Please enter the patient's name, phone number, service, and its date and time!"}</p>
         
         <form className="sf-form" onSubmit={handleSubmitClick}>
           {formError && <div style={{ color: 'var(--error-red)', fontSize: '0.9rem', marginBottom: '1rem' }}><AlertCircle size={15}/> {formError}</div>}
