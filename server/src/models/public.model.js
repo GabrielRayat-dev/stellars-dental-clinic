@@ -1,10 +1,10 @@
-const { supabase } = require('../config/supabase');
+const { supabase, supabaseAdmin } = require('../config/supabase');
 
 // ─── FAQs ───────────────────────────────────────────
 
-// Get all active FAQs (public)
+// Get all active FAQs (public) — anon client fine here, no RLS issue on reads
 const getActiveFaqs = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('faqs')
     .select('*')
     .eq('is_active', true)
@@ -16,7 +16,7 @@ const getActiveFaqs = async () => {
 
 // Get all FAQs (admin)
 const getAllFaqs = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('faqs')
     .select('*')
     .order('created_at', { ascending: true });
@@ -27,7 +27,7 @@ const getAllFaqs = async () => {
 
 // Create FAQ
 const createFaq = async (question, answer) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('faqs')
     .insert({ question, answer })
     .select()
@@ -39,7 +39,7 @@ const createFaq = async (question, answer) => {
 
 // Update FAQ
 const updateFaq = async (id, faqData) => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('faqs')
     .update({ ...faqData, updated_at: new Date() })
     .eq('id', id)
@@ -52,7 +52,7 @@ const updateFaq = async (id, faqData) => {
 
 // Delete FAQ
 const deleteFaq = async (id) => {
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('faqs')
     .delete()
     .eq('id', id);
@@ -65,7 +65,7 @@ const deleteFaq = async (id) => {
 
 // Get clinic information (public)
 const getClinicInformation = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('clinic_information')
     .select('*')
     .single();
@@ -76,30 +76,17 @@ const getClinicInformation = async () => {
 
 // Update clinic information (admin)
 const updateClinicInformation = async (clinicData) => {
-  const { data: existing } = await supabase
+  const { data: existing } = await supabaseAdmin
     .from('clinic_information')
     .select('id')
     .single();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('clinic_information')
     .update({ ...clinicData, updated_at: new Date() })
     .eq('id', existing.id)
     .select()
     .single();
-
-  if (error) throw error;
-  return data;
-};
-
-// Get public dentist list (public)
-const getPublicDentists = async () => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, name, email, phone_number, role')
-    .in('role', ['dentist', 'assistant'])
-    .eq('status', true)
-    .order('name', { ascending: true });
 
   if (error) throw error;
   return data;
@@ -113,5 +100,4 @@ module.exports = {
   deleteFaq,
   getClinicInformation,
   updateClinicInformation,
-  getPublicDentists,
-};
+};

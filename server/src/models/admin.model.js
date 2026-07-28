@@ -51,10 +51,14 @@ const createStaff = async (email, password, profileData) => {
 
   if (authError) throw authError;
 
+  // Strip out status from profileData — new accounts always start as logged_out
+  const { status, ...safeProfileData } = profileData;
+
   const { data, error } = await supabaseAdmin
     .from('profiles')
     .update({
-      ...profileData,
+      ...safeProfileData,
+      status: 'logged_out',
       must_change_password: true,
       updated_at: new Date(),
     })

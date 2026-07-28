@@ -59,7 +59,7 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const url = publicMode ? '/api/services/public' : '/api/services';
+        const url = publicMode ? '/api/services/public' : '/api/services/public';
         const headers = publicMode ? {} : { Authorization: `Bearer ${token}` };
         const res = await fetch(url, { headers });
         const json = await res.json();

@@ -8,6 +8,7 @@ router.get('/public', serviceController.getActiveServices);
 
 // Dentist only routes
 router.get('/', authenticate, authorizeDentist, serviceController.getAllServices);
+// router.get('/', authenticate, authorizeStaff, serviceController.getAllServices);
 router.post('/', authenticate, authorizeDentist, serviceController.createService);
 router.put('/:id', authenticate, authorizeDentist, serviceController.updateService);
 router.patch('/:id/toggle', authenticate, authorizeDentist, serviceController.toggleServiceStatus);
