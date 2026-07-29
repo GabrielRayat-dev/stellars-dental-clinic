@@ -32,6 +32,11 @@ const login = async (req, res) => {
       return res.status(500).json({ message: 'Error retrieving profile' });
     }
 
+    // Check if account is active
+    if (!profile.is_active) {
+      return res.status(403).json({ message: 'Account is disabled. Contact your administrator.' });
+    }
+
     await auditModel.logAction({
       actorId: profile.id,
       actorName: profile.name,

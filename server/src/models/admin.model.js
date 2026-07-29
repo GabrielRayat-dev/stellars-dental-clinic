@@ -71,10 +71,12 @@ const createStaff = async (email, password, profileData) => {
 };
 
 const updateStaff = async (id, profileData) => {
+  const { status, ...safeProfileData } = profileData;
+
   const { data, error } = await supabaseAdmin
     .from('profiles')
     .update({
-      ...profileData,
+      ...safeProfileData,
       updated_at: new Date(),
     })
     .eq('id', id)
