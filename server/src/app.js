@@ -20,6 +20,9 @@ const adminRoutes = require('./routes/admin.routes');
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 
+const availabilityRoutes = require('./routes/availability.routes');
+app.use('/api', availabilityRoutes);
+
 const appointmentRoutes = require('./routes/appointment.routes');
 app.use('/api/appointments', appointmentRoutes);
 
