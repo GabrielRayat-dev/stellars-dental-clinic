@@ -24,7 +24,7 @@ router.get('/appointments/availability', async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
@@ -42,7 +42,7 @@ router.get('/appointments/availability/:date', async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 

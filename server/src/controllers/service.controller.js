@@ -9,7 +9,7 @@ const getAllServices = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -22,7 +22,7 @@ const getActiveServices = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -41,7 +41,7 @@ const createService = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -50,17 +50,19 @@ const updateService = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const { name, description, price, is_active } = req.body;
+
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: 'No data provided for update' });
     }
 
-    const data = await serviceModel.updateService(id, req.body);
+    const data = await serviceModel.updateService(id, { name, description, price, is_active });
     res.status(200).json({
       message: 'Service updated successfully',
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -80,7 +82,7 @@ const toggleServiceStatus = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -91,7 +93,7 @@ const deleteService = async (req, res) => {
     const data = await serviceModel.deleteService(id);
     res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 

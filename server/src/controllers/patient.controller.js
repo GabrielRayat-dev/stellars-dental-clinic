@@ -12,7 +12,7 @@ const getAllPatients = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -31,7 +31,7 @@ const getPatientById = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -49,7 +49,7 @@ const createPatient = async (req, res) => {
       return res.status(400).json({ message: 'Required fields are missing' });
     }
 
-    const data = await patientModel.createPatient(req.body, req.profile.id);
+    const data = await patientModel.createPatient({ name, age, birthday, sex, civil_status, address, phone_number, emergency_contact, blood_type }, req.profile.id);
 
     await auditModel.logAction({
       actorId: req.profile.id,
@@ -65,7 +65,7 @@ const createPatient = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -73,12 +73,13 @@ const createPatient = async (req, res) => {
 const updatePatient = async (req, res) => {
   try {
     const { id } = req.params;
+    const { name, age, birthday, sex, civil_status, address, phone_number, emergency_contact, blood_type } = req.body;
 
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: 'No data provided for update' });
     }
 
-    const data = await patientModel.updatePatient(id, req.body);
+    const data = await patientModel.updatePatient(id, { name, age, birthday, sex, civil_status, address, phone_number, emergency_contact, blood_type });
 
     await auditModel.logAction({
       actorId: req.profile.id,
@@ -94,7 +95,7 @@ const updatePatient = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -115,7 +116,7 @@ const deletePatient = async (req, res) => {
 
     res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -129,13 +130,13 @@ const addDiagnosisRecord = async (req, res) => {
       return res.status(400).json({ message: 'Date, time, diagnosis and treatment are required' });
     }
 
-    const data = await patientModel.addDiagnosisRecord(id, req.body, req.profile.id);
+    const data = await patientModel.addDiagnosisRecord(id, { date, time, diagnosis, treatment, amount_paid, balance, chief_complaint }, req.profile.id);
     res.status(201).json({
       message: 'Diagnosis record added successfully',
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -143,12 +144,13 @@ const addDiagnosisRecord = async (req, res) => {
 const updateDiagnosisRecord = async (req, res) => {
   try {
     const { recordId } = req.params;
+    const { date, time, diagnosis, treatment, amount_paid, balance, chief_complaint } = req.body;
 
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: 'No data provided for update' });
     }
 
-    const data = await patientModel.updateDiagnosisRecord(recordId, req.body);
+    const data = await patientModel.updateDiagnosisRecord(recordId, { date, time, diagnosis, treatment, amount_paid, balance, chief_complaint });
 
     await auditModel.logAction({
       actorId: req.profile.id,
@@ -164,7 +166,7 @@ const updateDiagnosisRecord = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -185,7 +187,7 @@ const deleteDiagnosisRecord = async (req, res) => {
 
     res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -243,7 +245,7 @@ const addPatientImage = async (req, res) => {
       data,
     });
   } catch (error) {
-  res.status(error.statusCode || 500).json({ message: error.message });
+  res.status(error.statusCode || 500).json({ message: 'Internal server error' });
   }
 };
 
@@ -273,7 +275,7 @@ const deletePatientImage = async (req, res) => {
 
     res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 

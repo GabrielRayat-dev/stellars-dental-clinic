@@ -93,7 +93,7 @@ const changePassword = async (req, res) => {
     });
 
     if (error) {
-      return res.status(500).json({ message: error.message });
+      return res.status(500).json({ message: 'Internal server error' });
     }
 
     // Fix: use supabaseAdmin to bypass RLS
@@ -135,7 +135,7 @@ const logout = async (req, res) => {
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      return res.status(500).json({ message: error.message });
+      return res.status(500).json({ message: 'Internal server error' });
     }
 
     await auditModel.logAction({
@@ -161,7 +161,7 @@ const getProfile = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -176,7 +176,7 @@ const updateProfile = async (req, res) => {
         { email: new_email }
       );
       if (emailError) {
-        return res.status(500).json({ message: emailError.message });
+        return res.status(500).json({ message: 'Internal server error' });
       }
     }
 
@@ -190,7 +190,7 @@ const updateProfile = async (req, res) => {
         .single();
 
       if (profileError) {
-        return res.status(500).json({ message: profileError.message });
+        return res.status(500).json({ message: 'Internal server error' });
       }
 
       return res.status(200).json({
@@ -201,7 +201,7 @@ const updateProfile = async (req, res) => {
 
     res.status(200).json({ message: 'Profile updated successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -271,7 +271,7 @@ const resetPassword = async (req, res) => {
     });
 
     if (error) {
-      return res.status(500).json({ message: error.message });
+      return res.status(500).json({ message: 'Internal server error' });
     }
 
     res.status(200).json({ message: 'Password reset successfully' });

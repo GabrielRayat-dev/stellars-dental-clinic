@@ -1,11 +1,23 @@
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
 
+// Rate limiters
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { message: 'Too many requests. Try again later.' },
+});
+
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 // app.use(express.json());
 app.use((req, res, next) => {
   if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
@@ -17,7 +29,7 @@ app.use((req, res, next) => {
 // Routes
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/admin', adminRoutes);
 
 const availabilityRoutes = require('./routes/availability.routes');
@@ -46,13 +58,15 @@ app.get('/', (req, res) => {
   res.json({ message: 'Stellars Dental API is running' });
 });
 
-// Database test route
-app.get('/test-db', async (req, res) => {
-  const { supabase } = require('./config/supabase');
-  const { data, error } = await supabase.from('services').select('*');
-  if (error) return res.status(500).json({ message: error.message });
-  res.json({ message: 'Database connected', data });
-});
+// Database test route — disabled in production
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/test-db', async (req, res) => {
+    const { supabase } = require('./config/supabase');
+    const { data, error } = await supabase.from('services').select('*');
+    if (error) return res.status(500).json({ message: 'Internal server error' });
+    res.json({ message: 'Database connected', data });
+  });
+}
 
 // 404 handler
 app.use((req, res) => {

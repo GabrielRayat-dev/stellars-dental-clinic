@@ -10,7 +10,7 @@ const getAllStaff = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -29,7 +29,7 @@ const getStaffById = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -62,7 +62,7 @@ const createStaff = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -70,13 +70,13 @@ const createStaff = async (req, res) => {
 const updateStaff = async (req, res) => {
   try {
     const { id } = req.params;
-    const profileData = req.body;
+    const { name, role, is_active, specialization, phone_number } = req.body;
 
-    if (Object.keys(profileData).length === 0) {
+    if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: 'No data provided for update' });
     }
 
-    const data = await adminModel.updateStaff(id, profileData);
+    const data = await adminModel.updateStaff(id, { name, role, is_active, specialization, phone_number });
 
     await auditModel.logAction({
       actorId: req.profile.id,
@@ -92,7 +92,7 @@ const updateStaff = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -119,7 +119,7 @@ const deleteStaff = async (req, res) => {
 
     res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 

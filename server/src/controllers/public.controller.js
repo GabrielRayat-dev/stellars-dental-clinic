@@ -11,7 +11,7 @@ const getActiveFaqs = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -24,7 +24,7 @@ const getAllFaqs = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -43,7 +43,7 @@ const createFaq = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -56,13 +56,14 @@ const updateFaq = async (req, res) => {
       return res.status(400).json({ message: 'No data provided for update' });
     }
 
-    const data = await publicModel.updateFaq(id, req.body);
+    const { question, answer, is_active } = req.body;
+    const data = await publicModel.updateFaq(id, { question, answer, is_active });
     res.status(200).json({
       message: 'FAQ updated successfully',
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -73,7 +74,7 @@ const deleteFaq = async (req, res) => {
     const data = await publicModel.deleteFaq(id);
     res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -88,7 +89,7 @@ const getClinicInformation = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -101,7 +102,7 @@ const getPublicDentists = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -112,13 +113,14 @@ const updateClinicInformation = async (req, res) => {
       return res.status(400).json({ message: 'No data provided for update' });
     }
 
-    const data = await publicModel.updateClinicInformation(req.body);
+    const { name, address, phone, email, operating_hours, description } = req.body;
+    const data = await publicModel.updateClinicInformation({ name, address, phone, email, operating_hours, description });
     res.status(200).json({
       message: 'Clinic information updated successfully',
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
