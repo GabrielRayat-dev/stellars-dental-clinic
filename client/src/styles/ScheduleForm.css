@@ -2,17 +2,21 @@
 .sf-container {
   display: flex;
   justify-content: center;
-  padding: 2rem 0;
+  padding: 0;
+  margin: 0;
 }
 
 .sf-card {
   width: 100%;
-  max-width: 650px;
   background: #ffffff;
-  border: 2px solid var(--primary-green);
-  padding: 2.5rem;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--primary-green);
+  padding: 2.5rem 2rem;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.sf-card--integrated {
+  border-radius: 0;
 }
 
 .sf-title {
@@ -20,6 +24,7 @@
   color: var(--primary-green);
   margin: 0;
   font-family: var(--font-serif);
+  text-align: center;
 }
 
 .sf-subtitle {
@@ -28,6 +33,35 @@
   font-style: italic;
   margin-bottom: 2rem;
   font-family: var(--font-serif);
+  text-align: center;
+}
+
+/* ── Integrated Layout: 3 Columns ─────────────────────── */
+.sf-integrated-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2rem;
+  min-height: 600px;
+}
+
+@media (max-width: 1024px) {
+  .sf-integrated-layout {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .sf-integrated-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* ── Left Column: Form ─────────────────────── */
+.sf-form-column {
+  display: flex;
+  flex-direction: column;
 }
 
 .sf-form {
@@ -58,121 +92,12 @@
   color: var(--text-dark);
   outline: none;
   transition: all 0.2s;
+  border-radius: 4px;
 }
 
 .sf-input:focus {
   border-color: var(--primary-green);
   box-shadow: 0 0 0 3px rgba(61, 118, 85, 0.1);
-}
-
-/* Horizontal Date Carousel */
-.sf-date-picker-wrap {
-  margin-top: 1rem;
-}
-
-.sf-date-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  font-family: var(--font-serif);
-}
-
-.sf-month-nav {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sf-month-nav button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--primary-green);
-  display: flex;
-  align-items: center;
-}
-
-.sf-today-btn {
-  font-family: var(--font-serif);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #fff !important;
-  background: var(--primary-green) !important;
-  border: none !important;
-  padding: 0.25rem 0.65rem;
-  cursor: pointer;
-  letter-spacing: 0.3px;
-  transition: background 0.2s;
-}
-
-.sf-today-btn:hover {
-  background: var(--primary-green-hover) !important;
-}
-
-.sf-date-carousel-wrap {
-  width: 100%;
-}
-
-.sf-date-grid {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding: 0.5rem 0;
-  scrollbar-width: none;
-  scroll-behavior: smooth;
-  cursor: grab;
-}
-
-.sf-date-grid:active {
-  cursor: grabbing;
-}
-
-.sf-date-grid::-webkit-scrollbar {
-  display: none;
-}
-
-.sf-date-box {
-  flex: 0 0 calc((100% - (6 * 0.5rem)) / 7);
-  border: 1px solid var(--primary-green);
-  text-align: center;
-  transition: all 0.2s;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  user-select: none;
-}
-
-.sf-date-box__month {
-  background: var(--primary-green);
-  color: #fff;
-  font-size: 0.7rem;
-  padding: 0.2rem 0;
-  text-transform: uppercase;
-  font-family: var(--font-serif);
-}
-
-.sf-date-box__day {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--primary-green);
-  padding: 0.6rem 0;
-  font-family: var(--font-serif);
-}
-
-.sf-date-box:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.sf-date-box--selected {
-  background: var(--primary-green-light);
-}
-
-.sf-date-box--today {
-  border: 3px solid var(--primary-green);
 }
 
 .sf-submit-btn {
@@ -185,10 +110,11 @@
   font-weight: 600;
   font-family: var(--font-serif);
   cursor: pointer;
+  border-radius: 4px;
   transition: background 0.2s;
 }
 
-.sf-submit-btn:hover {
+.sf-submit-btn:hover:not(:disabled) {
   background: var(--primary-green-hover);
 }
 
@@ -197,31 +123,340 @@
   cursor: not-allowed;
 }
 
-/* Time Modal Styles */
+/* ── Middle Column: Calendar ─────────────────────── */
+.sf-calendar-column {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.sf-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sf-calendar-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-green);
+  margin: 0;
+  font-family: var(--font-serif);
+}
+
+.sf-nav-btn {
+  background: none;
+  border: none;
+  color: var(--primary-green);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  transition: color 0.2s;
+}
+
+.sf-nav-btn:hover {
+  color: var(--primary-green-hover);
+}
+
+.sf-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.sf-weekday {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  padding: 0.3rem 0;
+  font-family: var(--font-serif);
+  text-transform: uppercase;
+}
+
+.sf-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.3rem;
+  flex: 1;
+  margin-bottom: 1rem;
+}
+
+/* ── Calendar Day Cells ─────────────────────── */
+.sf-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #ffffff;
+  color: var(--text-dark);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-serif);
+  position: relative;
+}
+
+.sf-day--empty {
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.sf-day-number {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.sf-day:hover:not(.sf-day--empty):not(.sf-day--fully-booked):not(.sf-day--past) {
+  background: var(--primary-green-light);
+  border-color: var(--primary-green);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Has at least 1 appointment: orange color */
+.sf-day--has-appointments {
+  border-color: #ff9800;
+  color: #ff9800;
+}
+
+.sf-day--has-appointments .sf-day-number {
+  color: #ff9800;
+}
+
+/* Selected day: highlighted */
+.sf-day--selected {
+  background: var(--primary-green);
+  color: #ffffff;
+  border-color: var(--primary-green);
+}
+
+.sf-day--selected .sf-day-number {
+  color: #ffffff;
+}
+
+/* Today indicator */
+.sf-day--today {
+  border-width: 2px;
+  border-color: var(--primary-green);
+}
+
+/* Past dates: disabled */
+.sf-day--past {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Fully booked: low opacity and not clickable */
+.sf-day--fully-booked {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #e8e8e8;
+  border-color: #999;
+  color: #999;
+}
+
+.sf-day--fully-booked .sf-day-number {
+  color: #999;
+}
+
+.sf-day--fully-booked:hover {
+  transform: none;
+  box-shadow: none;
+  background: #e8e8e8;
+}
+
+/* ── Calendar Legend ─────────────────────── */
+.sf-calendar-legend {
+  display: flex;
+  gap: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid #ddd;
+  flex-wrap: wrap;
+}
+
+.sf-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+}
+
+.sf-legend-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.sf-legend-box--default {
+  border: 1px solid #ddd;
+  background: #ffffff;
+}
+
+.sf-legend-box--has-requests {
+  background: #ff9800;
+  border: 1px solid #ff9800;
+}
+
+.sf-legend-box--fully-booked {
+  background: #f0f0f0;
+  border: 1px solid #bbb;
+  opacity: 0.5;
+}
+
+/* ── Right Column: Time Slots ─────────────────────── */
+.sf-timeslots-column {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.sf-timeslots-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-green);
+  margin: 0 0 0.25rem 0;
+  font-family: var(--font-serif);
+}
+
+.sf-timeslots-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem 0;
+  font-family: var(--font-serif);
+}
+
 .sf-time-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 0.75rem;
-  padding: 1rem 0;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+  flex: 1;
+  margin-bottom: 1rem;
 }
 
+/* ── Time Slot Styles ─────────────────────── */
 .sf-time-slot {
-  padding: 0.6rem;
-  border: 1px solid var(--primary-green);
-  background: transparent;
-  color: var(--primary-green);
-  font-family: var(--font-serif);
-  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: auto;
+  min-height: 55px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--text-dark);
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
-  text-align: center;
+  transition: all 0.2s ease;
+  position: relative;
+  font-family: var(--font-serif);
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
-.sf-time-slot:hover {
+.sf-time-slot-time {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Default state: no requests, no approved */
+.sf-time-slot:hover:not(.sf-time-slot--booked) {
   background: var(--primary-green-light);
+  border-color: var(--primary-green);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Pending requests: orange color with badge showing count */
+.sf-time-slot--pending {
+  border-color: #ff9800;
+  color: #ff9800;
+  background: #fff8f0;
+}
+
+.sf-time-slot--pending .sf-time-slot-time {
+  color: #ff9800;
+}
+
+/* Selected time slot */
 .sf-time-slot--selected {
   background: var(--primary-green);
-  color: #fff;
+  color: #ffffff;
+  border-color: var(--primary-green);
 }
+
+.sf-time-slot--selected .sf-time-slot-time {
+  color: #ffffff;
+}
+
+/* Booked/Approved: low opacity, not clickable */
+.sf-time-slot--booked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f0f0f0;
+  border-color: #bbb;
+  color: var(--text-muted);
+}
+
+.sf-time-slot--booked:hover {
+  transform: none;
+  box-shadow: none;
+  background: #f0f0f0;
+}
+
+/* Badge for pending count */
+.sf-time-slot-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  background: #ff9800;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Time Slots Legend ─────────────────────── */
+.sf-timeslots-legend {
+  display: flex;
+  gap: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid #ddd;
+  flex-wrap: wrap;
+}
+
+.sf-legend-box--time-default {
+  border: 1px solid #ddd;
+  background: #ffffff;
+}
+
+.sf-legend-box--time-pending {
+  background: #ff9800;
+  border: 1px solid #ff9800;
+}
+
+.sf-legend-box--time-booked {
+  background: #f0f0f0;
+  border: 1px solid #bbb;
+  opacity: 0.5;
+}
+

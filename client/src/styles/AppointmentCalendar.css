@@ -1,0 +1,340 @@
+/* ── Appointment Calendar Component ─────────────────────── */
+
+.ac-container {
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.ac-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+}
+
+@media (max-width: 1024px) {
+  .ac-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* ── Calendar Panel ──────────────────────── */
+.ac-calendar-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ac-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.ac-month-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--primary-green);
+  margin: 0;
+  font-family: var(--font-serif);
+}
+
+.ac-nav-btn {
+  background: none;
+  border: none;
+  color: var(--primary-green);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  transition: color 0.2s;
+}
+
+.ac-nav-btn:hover {
+  color: var(--primary-green-hover);
+}
+
+.ac-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ac-weekday {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.5rem 0;
+  font-family: var(--font-serif);
+  text-transform: uppercase;
+}
+
+.ac-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+/* ── Calendar Day Cells ──────────────────────── */
+.ac-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--primary-green);
+  border-radius: 4px;
+  background: #ffffff;
+  color: var(--text-dark);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  font-family: var(--font-serif);
+}
+
+.ac-day--empty {
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.ac-day-number {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Default state: no appointments */
+.ac-day {
+  border-color: #ddd;
+}
+
+.ac-day:hover:not(.ac-day--empty):not(.ac-day--fully-booked) {
+  background: var(--primary-green-light);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Has at least 1 appointment: orange color */
+.ac-day--has-appointments {
+  border-color: #ff9800;
+  color: #ff9800;
+}
+
+.ac-day--has-appointments .ac-day-number {
+  color: #ff9800;
+}
+
+/* Selected day: highlighted */
+.ac-day--selected {
+  background: var(--primary-green);
+  color: #ffffff;
+  border-color: var(--primary-green);
+}
+
+.ac-day--selected .ac-day-number {
+  color: #ffffff;
+}
+
+/* Today indicator */
+.ac-day--today {
+  border-width: 3px;
+}
+
+/* Fully booked: low opacity and not clickable */
+.ac-day--fully-booked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f0f0f0;
+}
+
+.ac-day--fully-booked:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Calendar Legend ──────────────────────── */
+.ac-legend {
+  display: flex;
+  gap: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  flex-wrap: wrap;
+}
+
+.ac-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+}
+
+.ac-legend-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+}
+
+.ac-legend-box--default {
+  border: 1px solid #ddd;
+  background: #ffffff;
+}
+
+.ac-legend-box--has-requests {
+  background: #ff9800;
+  border: 1px solid #ff9800;
+}
+
+.ac-legend-box--fully-booked {
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  opacity: 0.5;
+}
+
+/* ── Time Slots Panel ──────────────────────── */
+.ac-time-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.ac-time-header {
+  border-bottom: 2px solid var(--primary-green);
+  padding-bottom: 1rem;
+}
+
+.ac-time-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-green);
+  margin: 0;
+  font-family: var(--font-serif);
+}
+
+.ac-time-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0 0;
+  font-family: var(--font-serif);
+}
+
+.ac-time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.8rem;
+}
+
+/* ── Time Slot Styles ──────────────────────── */
+.ac-time-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border: 2px solid var(--border-light);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--text-dark);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  font-family: var(--font-serif);
+}
+
+.ac-time-slot-time {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Default state: no requests, no approved */
+.ac-time-slot {
+  border-color: #ddd;
+}
+
+.ac-time-slot:hover:not(.ac-time-slot--booked) {
+  background: var(--primary-green-light);
+  border-color: var(--primary-green);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Pending requests: orange color with badge showing count */
+.ac-time-slot--pending {
+  border-color: #ff9800;
+  color: #ff9800;
+  background: #fff8f0;
+}
+
+.ac-time-slot--pending .ac-time-slot-time {
+  color: #ff9800;
+}
+
+/* Booked/Approved: low opacity, not clickable */
+.ac-time-slot--booked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f0f0f0;
+  border-color: #bbb;
+}
+
+.ac-time-slot--booked:hover {
+  transform: none;
+  box-shadow: none;
+  background: #f0f0f0;
+}
+
+/* Badge for pending count */
+.ac-time-slot-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: #ff9800;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Time Slots Legend ──────────────────────── */
+.ac-time-legend {
+  display: flex;
+  gap: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  flex-wrap: wrap;
+}
+
+.ac-legend-box--time-default {
+  border: 1px solid #ddd;
+  background: #ffffff;
+}
+
+.ac-legend-box--time-pending {
+  background: #ff9800;
+  border: 1px solid #ff9800;
+}
+
+.ac-legend-box--time-booked {
+  background: #f0f0f0;
+  border: 1px solid #bbb;
+  opacity: 0.5;
+}

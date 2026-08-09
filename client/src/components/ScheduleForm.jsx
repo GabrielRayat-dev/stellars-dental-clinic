@@ -1,20 +1,63 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
-import Modal from './Modal';
 import ModalConfirmation from './ModalConfirmation';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ScheduleForm.css';
 
 const TIME_SLOTS = [
-  '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM',
-  '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'
+  '08:00', '09:00', '10:00', '11:00', '12:00',
+  '13:00', '14:00', '15:00', '16:00'
 ];
+
+// Format date using local date components (avoids timezone issues)
+const getLocalDateString = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const format12h = (time24) => {
+  const [hours, minutes] = time24.split(':');
+  const h = parseInt(hours);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}:${minutes} ${ampm}`;
+};
+
+const analyzeTimeSlot = (date, time, appointments) => {
+  const dateStr = getLocalDateString(date);
+  const timeDisplay = format12h(time);
+  const slotAppointments = appointments.filter(app => {
+    return app.preferred_date === dateStr && app.preferred_time === timeDisplay;
+  });
+
+  const hasPending = slotAppointments.some(app => app.status === 'pending');
+  const hasApproved = slotAppointments.some(app => app.status === 'approved');
+  const pendingCount = slotAppointments.filter(app => app.status === 'pending').length;
+
+  return { hasPending, hasApproved, pendingCount };
+};
+
+const analyzeDateStatus = (date, appointments) => {
+  const dateStr = getLocalDateString(date);
+  const dateAppointments = appointments.filter(app => app.preferred_date === dateStr);
+  const hasAppointments = dateAppointments.length > 0;
+  
+  const approvedPerSlot = TIME_SLOTS.map(time => {
+    return analyzeTimeSlot(date, time, appointments).hasApproved;
+  });
+  const isFullyBooked = TIME_SLOTS.length > 0 && approvedPerSlot.every(b => b);
+
+  return { hasAppointments, isFullyBooked };
+};
 
 const ScheduleForm = ({ onSuccess, publicMode = false }) => {
   const { token } = useAuth();
   const [services, setServices] = useState([]);
+  const [appointments, setAppointments] = useState([]);
 
-  // Success state (public mode shows tracking number)
+  // Success state
   const [submitted, setSubmitted] = useState(false);
   const [trackingNumber, setTrackingNumber] = useState('');
   
@@ -31,213 +74,106 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
   const [formError, setFormError] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Date/Time Selection
-  const [showTimeModal, setShowTimeModal] = useState(false);
-  const [tempDate, setTempDate] = useState(null);
-  const dateScrollRef = useRef(null);
+  // Calendar State
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null);
 
-
-  // Generate 90 days starting from today (no past dates)
-  const datesList = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dates = [];
-    for (let i = 0; i < 90; i++) {
-      const d = new Date(today);
-      d.setDate(d.getDate() + i);
-      dates.push(d);
-    }
-    return dates;
-  }, []);
-
-  const [currentMonthDate, setCurrentMonthDate] = useState(() => {
-    const d = new Date();
-    d.setDate(1);
-    return d;
-  });
-
+  // Fetch services and appointments
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchData = async () => {
       try {
-        const url = publicMode ? '/api/services/public' : '/api/services/public';
-        const headers = publicMode ? {} : { Authorization: `Bearer ${token}` };
-        const res = await fetch(url, { headers });
-        const json = await res.json();
-        if (res.ok && json.data) {
-          setServices(json.data);
+        // Fetch services
+        const servicesRes = await fetch('/api/services/public');
+        const servicesJson = await servicesRes.json();
+        if (servicesRes.ok && servicesJson.data) {
+          setServices(servicesJson.data);
+        }
+
+        // Fetch appointments to show availability
+        let appointmentsUrl = '/api/appointments/public/availability';
+        let appointmentsHeaders = {};
+        
+        // If authenticated (protected mode), use the authenticated endpoint
+        if (token) {
+          appointmentsUrl = '/api/appointments';
+          appointmentsHeaders = { Authorization: `Bearer ${token}` };
+        }
+        
+        const appointmentsRes = await fetch(appointmentsUrl, {
+          headers: appointmentsHeaders
+        });
+        const appointmentsJson = await appointmentsRes.json();
+        if (appointmentsRes.ok && appointmentsJson.data) {
+          setAppointments(appointmentsJson.data);
         }
       } catch (err) {
-        console.error('Failed to fetch services:', err);
+        console.error('Failed to fetch data:', err);
       }
     };
-    fetchServices();
+    fetchData();
   }, [token, publicMode]);
 
-  const handleScroll = () => {
-    if (!dateScrollRef.current) return;
-    const container = dateScrollRef.current;
-    const children = Array.from(container.children);
-    
-    let firstIdx = 0;
-    for (let i = 0; i < children.length; i++) {
-      if (children[i].offsetLeft - container.offsetLeft >= container.scrollLeft - 5) {
-        firstIdx = i;
-        break;
-      }
-    }
-
-    const visibleDateStr = children[firstIdx]?.getAttribute('data-date');
-    if (visibleDateStr) {
-      const visibleDate = new Date(visibleDateStr);
-      if (visibleDate.getMonth() !== currentMonthDate.getMonth() || visibleDate.getFullYear() !== currentMonthDate.getFullYear()) {
-        setCurrentMonthDate(new Date(visibleDate.getFullYear(), visibleDate.getMonth(), 1));
-      }
-    }
+  // Get days in month
+  const getDaysInMonth = (date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   };
 
-  const navigateToMonth = (direction) => {
-    const targetMonth = new Date(currentMonthDate);
-    targetMonth.setMonth(targetMonth.getMonth() + direction);
-    
-    const targetIdx = datesList.findIndex(d => d.getMonth() === targetMonth.getMonth() && d.getFullYear() === targetMonth.getFullYear());
-    
-    if (targetIdx !== -1 && dateScrollRef.current) {
-      const container = dateScrollRef.current;
-      const targetElement = container.children[targetIdx];
-      if (targetElement) {
-        container.scroll({
-          left: targetElement.offsetLeft - container.offsetLeft,
-          behavior: 'smooth'
-        });
-      }
-    }
+  const getFirstDayOfMonth = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
-  const scrollToDate = (dateObj, smooth = true) => {
-    if (!dateScrollRef.current) return;
-    const container = dateScrollRef.current;
-    const targetDate = formatDateForBackend(dateObj);
-    const targetEl = Array.from(container.children).find(
-      (el) => el.getAttribute('data-date') === targetDate
-    );
-    if (targetEl) {
-      container.scroll({
-        left: targetEl.offsetLeft - container.offsetLeft,
-        behavior: smooth ? 'smooth' : 'auto',
-      });
+  // Generate calendar days
+  const monthDays = useMemo(() => {
+    const daysInMonth = getDaysInMonth(currentMonth);
+    const firstDay = getFirstDayOfMonth(currentMonth);
+    const days = [];
+
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
     }
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i));
+    }
+
+    return days;
+  }, [currentMonth]);
+
+  const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  const handlePrevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
   };
 
-  const scrollToToday = () => {
+  const handleNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+  };
+
+  const handleDateClick = (date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    scrollToDate(today, true);
-    const todayMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    setCurrentMonthDate(todayMonth);
+    if (date < today) return; // Disable past dates
+
+    const status = analyzeDateStatus(date, appointments);
+    if (status.isFullyBooked) return; // Fully booked dates are not clickable
+
+    setSelectedDate(date);
+    // Reset time when date changes
+    setForm(f => ({ ...f, preferred_date: '', preferred_time: '' }));
   };
 
-  // Ref-based mouse drag with momentum/inertia
-  const dragState = useRef({
-    active: false,
-    startX: 0,
-    scrollLeft: 0,
-    moved: false,
-    velX: 0,          // current velocity (px/ms)
-    lastX: 0,
-    lastTime: 0,
-    rafId: null,      // animation frame id for momentum
-  });
+  const handleTimeSlotClick = (time) => {
+    const dateStr = getLocalDateString(selectedDate);
+    const timeStr = format12h(time);
+    
+    const { hasApproved } = analyzeTimeSlot(selectedDate, time, appointments);
+    if (hasApproved) return; // Booked slots are not clickable
 
-  const stopMomentum = () => {
-    if (dragState.current.rafId) {
-      cancelAnimationFrame(dragState.current.rafId);
-      dragState.current.rafId = null;
-    }
-  };
-
-  const applyMomentum = () => {
-    const ds = dragState.current;
-    const el = dateScrollRef.current;
-    if (!el || Math.abs(ds.velX) < 0.3) {
-      stopMomentum();
-      return;
-    }
-    el.scrollLeft += ds.velX * 16; // 16ms ≈ one frame
-    ds.velX *= 0.92;               // friction — higher = slides longer
-    ds.rafId = requestAnimationFrame(applyMomentum);
-  };
-
-  const onMouseDown = (e) => {
-    if (e.button !== 0) return;
-    stopMomentum();
-    const ds = dragState.current;
-    ds.active    = true;
-    ds.moved     = false;
-    ds.startX    = e.pageX;
-    ds.lastX     = e.pageX;
-    ds.lastTime  = performance.now();
-    ds.velX      = 0;
-    ds.scrollLeft = dateScrollRef.current.scrollLeft;
-    dateScrollRef.current.style.cursor = 'grabbing';
-    dateScrollRef.current.style.scrollBehavior = 'auto';
-    e.preventDefault();
-  };
-
-  const onMouseMove = (e) => {
-    const ds = dragState.current;
-    if (!ds.active) return;
-    const now = performance.now();
-    const dx  = e.pageX - ds.startX;
-    if (Math.abs(dx) > 3) ds.moved = true;
-
-    // Track velocity (px per ms)
-    const dt = now - ds.lastTime;
-    if (dt > 0) {
-      ds.velX = (ds.lastX - e.pageX) / dt;
-    }
-    ds.lastX    = e.pageX;
-    ds.lastTime = now;
-
-    dateScrollRef.current.scrollLeft = ds.scrollLeft - dx;
-  };
-
-  const onMouseUp = () => {
-    const ds = dragState.current;
-    ds.active = false;
-    if (dateScrollRef.current) {
-      dateScrollRef.current.style.cursor = '';
-      dateScrollRef.current.style.scrollBehavior = '';
-    }
-    // Kick off momentum if the user was moving fast enough
-    if (Math.abs(ds.velX) > 0.3) {
-      ds.rafId = requestAnimationFrame(applyMomentum);
-    }
-  };
-
-  const onMouseLeave = () => {
-    const ds = dragState.current;
-    if (!ds.active) return;
-    ds.active = false;
-    if (dateScrollRef.current) {
-      dateScrollRef.current.style.cursor = '';
-      dateScrollRef.current.style.scrollBehavior = '';
-    }
-    if (Math.abs(ds.velX) > 0.3) {
-      ds.rafId = requestAnimationFrame(applyMomentum);
-    }
-  };
-
-  const formatDateForDisplay = (dateStr) => {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-  
-  const formatDateForBackend = (dateObj) => {
-    const d = new Date(dateObj);
-    const month = '' + (d.getMonth() + 1);
-    const day = '' + d.getDate();
-    const year = d.getFullYear();
-    return [year, month.padStart(2, '0'), day.padStart(2, '0')].join('-');
+    setForm(f => ({
+      ...f,
+      preferred_date: dateStr,
+      preferred_time: timeStr
+    }));
   };
 
   const handleFormChange = (e) => {
@@ -245,22 +181,15 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
     setForm(f => ({ ...f, [name]: value }));
   };
 
-  const handleDateClick = (dateObj) => {
-    if (dragState.current.moved) return; // ignore click if user was dragging
-    setTempDate(dateObj);
-    setShowTimeModal(true);
+  const formatDateForDisplay = (dateStr) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric' 
+    });
   };
 
-  const selectTime = (timeSlot) => {
-    setForm(f => ({
-      ...f,
-      preferred_date: formatDateForBackend(tempDate),
-      preferred_time: timeSlot
-    }));
-    setShowTimeModal(false);
-  };
-
-  // Show confirmation modal instead of submitting directly
   const handleSubmitClick = (e) => {
     e.preventDefault();
     setFormError('');
@@ -285,9 +214,9 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
       if (!res.ok) throw new Error(json.message || 'Failed to create appointment');
 
       setForm(emptyForm);
+      setSelectedDate(null);
 
       if (publicMode) {
-        // Show inline success with tracking number instead of calling onSuccess
         setTrackingNumber(json.data?.tracking_number || json.data?.id || '');
         setSubmitted(true);
       } else {
@@ -328,125 +257,194 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
 
   return (
     <div className="sf-container">
-      <div className="sf-card">
+      <div className="sf-card sf-card--integrated">
         <h2 className="sf-title">{publicMode ? 'Book an Appointment' : 'Schedule a Patient'}</h2>
-        <p className="sf-subtitle">{publicMode ? 'Fill in your details, choose a date and time, and we\'ll confirm your appointment.' : "Please enter the patient's name, phone number, service, and its date and time!"}</p>
+        <p className="sf-subtitle">Fill in your details, choose a date and time, and confirm your appointment.</p>
         
-        <form className="sf-form" onSubmit={handleSubmitClick}>
-          {formError && <div style={{ color: 'var(--error-red)', fontSize: '0.9rem', marginBottom: '1rem' }}><AlertCircle size={15}/> {formError}</div>}
-          
-          <div className="sf-field">
-            <label>Patient Name</label>
-            <input className="sf-input" name="patient_name" value={form.patient_name} onChange={handleFormChange} placeholder="Juan Cruz" required />
-          </div>
-          
-          <div className="sf-field">
-            <label>Phone Number</label>
-            <input className="sf-input" name="phone_number" value={form.phone_number} onChange={handleFormChange} placeholder="09123456789" required />
-          </div>
-          
-          <div className="sf-field">
-            <label>Service</label>
-            <select className="sf-input" name="service_id" value={form.service_id} onChange={handleFormChange} required>
-              <option value="" disabled>Select a service</option>
-              {services.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
+        <div className="sf-integrated-layout">
+          {/* ── Left Column: Form ── */}
+          <div className="sf-form-column">
+            <form className="sf-form" onSubmit={handleSubmitClick}>
+              {formError && <div style={{ color: 'var(--error-red)', fontSize: '0.9rem', marginBottom: '1rem' }}><AlertCircle size={15}/> {formError}</div>}
+              
+              <div className="sf-field">
+                <label>Patient Name</label>
+                <input className="sf-input" name="patient_name" value={form.patient_name} onChange={handleFormChange} placeholder="Juan Cruz" required />
+              </div>
+              
+              <div className="sf-field">
+                <label>Phone Number</label>
+                <input className="sf-input" name="phone_number" value={form.phone_number} onChange={handleFormChange} placeholder="09123456789" required />
+              </div>
+              
+              <div className="sf-field">
+                <label>Service</label>
+                <select className="sf-input" name="service_id" value={form.service_id} onChange={handleFormChange} required>
+                  <option value="" disabled>Select a service</option>
+                  {services.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #eee' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem', fontStyle: 'italic' }}>
+                  {form.preferred_date && form.preferred_time 
+                    ? `📅 Selected: ${formatDateForDisplay(form.preferred_date)} at ${form.preferred_time}`
+                    : 'Select a date and time →'
+                  }
+                </p>
+                <button type="submit" className="sf-submit-btn" disabled={submitting || !form.preferred_date || !form.preferred_time}>
+                  {submitting ? 'Scheduling...' : 'Schedule Appointment'}
+                </button>
+              </div>
+            </form>
           </div>
 
-          <div className="sf-date-picker-wrap">
-            <div className="sf-date-header">
-              <span>Choose a Date and Time</span>
-              <div className="sf-month-nav">
-                <button type="button" className="sf-today-btn" onClick={scrollToToday}>Today</button>
-                <button type="button" onClick={() => navigateToMonth(-1)}><ChevronLeft size={16}/></button>
-                <span style={{ minWidth: '100px', textAlign: 'center' }}>
-                  {currentMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </span>
-                <button type="button" onClick={() => navigateToMonth(1)}><ChevronRight size={16}/></button>
+          {/* ── Middle Column: Calendar ── */}
+          <div className="sf-calendar-column">
+            <div className="sf-calendar-header">
+              <button onClick={handlePrevMonth} className="sf-nav-btn">
+                <ChevronLeft size={18} />
+              </button>
+              <h4 className="sf-calendar-title">{monthName}</h4>
+              <button onClick={handleNextMonth} className="sf-nav-btn">
+                <ChevronRight size={18} />
+              </button>
+            </div>
+
+            {/* Day headers */}
+            <div className="sf-weekdays">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <div key={day} className="sf-weekday">{day}</div>
+              ))}
+            </div>
+
+            {/* Calendar grid */}
+            <div className="sf-days-grid">
+              {monthDays.map((date, idx) => {
+                if (!date) {
+                  return <div key={`empty-${idx}`} className="sf-day sf-day--empty"></div>;
+                }
+
+                const dateStr = getLocalDateString(date);
+                const isSelected = selectedDate && getLocalDateString(selectedDate) === dateStr;
+                const isToday = new Date().toDateString() === date.toDateString();
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const isPast = date < today;
+                
+                const { hasAppointments, isFullyBooked } = analyzeDateStatus(date, appointments);
+
+                return (
+                  <div
+                    key={dateStr}
+                    className={`sf-day 
+                      ${isSelected ? 'sf-day--selected' : ''} 
+                      ${isToday ? 'sf-day--today' : ''} 
+                      ${hasAppointments && !isFullyBooked ? 'sf-day--has-appointments' : ''}
+                      ${isFullyBooked ? 'sf-day--fully-booked' : ''}
+                      ${isPast ? 'sf-day--past' : ''}
+                    `}
+                    onClick={() => !isPast && !isFullyBooked && handleDateClick(date)}
+                  >
+                    <span className="sf-day-number">{date.getDate()}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Legend */}
+            <div className="sf-calendar-legend">
+              <div className="sf-legend-item">
+                <div className="sf-legend-box sf-legend-box--default"></div>
+                <span>Available</span>
+              </div>
+              <div className="sf-legend-item">
+                <div className="sf-legend-box sf-legend-box--has-requests"></div>
+                <span>Has Requests</span>
+              </div>
+              <div className="sf-legend-item">
+                <div className="sf-legend-box sf-legend-box--fully-booked"></div>
+                <span>Booked</span>
               </div>
             </div>
-            <div className="sf-date-carousel-wrap">
-              <div 
-                className="sf-date-grid" 
-                ref={dateScrollRef}
-                onScroll={handleScroll}
-                onMouseDown={onMouseDown}
-                onMouseLeave={onMouseLeave}
-                onMouseUp={onMouseUp}
-                onMouseMove={onMouseMove}
-              >
-                {datesList.map((d) => {
-                  const dateStr = formatDateForBackend(d);
-                  const isSelected = form.preferred_date === dateStr;
-                  const todayStr = formatDateForBackend(new Date());
-                  const isToday = dateStr === todayStr;
-                  
+          </div>
+
+          {/* ── Right Column: Time Slots ── */}
+          {selectedDate && (
+            <div className="sf-timeslots-column">
+              <h4 className="sf-timeslots-title">
+                {selectedDate.toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  month: 'short', 
+                  day: 'numeric' 
+                })}
+              </h4>
+              <p className="sf-timeslots-subtitle">Select a time slot</p>
+
+              <div className="sf-time-grid">
+                {TIME_SLOTS.map(time => {
+                  const { hasPending, hasApproved, pendingCount } = analyzeTimeSlot(
+                    selectedDate,
+                    time,
+                    appointments
+                  );
+
+                  const isClickable = !hasApproved;
+                  const isSelected = form.preferred_time === format12h(time) && form.preferred_date === getLocalDateString(selectedDate);
+                  const slotClass = `
+                    sf-time-slot
+                    ${hasApproved ? 'sf-time-slot--booked' : ''}
+                    ${hasPending ? 'sf-time-slot--pending' : ''}
+                    ${isSelected ? 'sf-time-slot--selected' : ''}
+                  `;
+
                   return (
-                    <div 
-                      key={dateStr} 
-                      data-date={dateStr}
-                      className={`sf-date-box ${isSelected ? 'sf-date-box--selected' : ''} ${isToday ? 'sf-date-box--today' : ''}`}
-                      onClick={() => {
-                    if (!dragState.current.moved) handleDateClick(d);
-                  }}
+                    <div
+                      key={time}
+                      className={slotClass}
+                      onClick={() => isClickable && handleTimeSlotClick(time)}
                     >
-                      <span className="sf-date-box__month">{d.toLocaleDateString('en-US', { month: 'short' })}</span>
-                      <span className="sf-date-box__day">{d.getDate()}</span>
+                      <div className="sf-time-slot-time">{format12h(time)}</div>
+                      {hasPending && (
+                        <div className="sf-time-slot-badge">{pendingCount}</div>
+                      )}
                     </div>
                   );
                 })}
               </div>
-            </div>
-            {form.preferred_time && (
-              <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--primary-green)', fontWeight: 'bold' }}>
-                Selected Time: {form.preferred_time} on {formatDateForDisplay(form.preferred_date)}
-              </div>
-            )}
-          </div>
 
-          <button type="submit" className="sf-submit-btn" disabled={submitting}>
-            {submitting ? 'Scheduling...' : 'Schedule Appointment'}
-          </button>
-        </form>
+              {/* Legend for time slots */}
+              <div className="sf-timeslots-legend">
+                <div className="sf-legend-item">
+                  <div className="sf-legend-box sf-legend-box--time-default"></div>
+                  <span>No Requests</span>
+                </div>
+                <div className="sf-legend-item">
+                  <div className="sf-legend-box sf-legend-box--time-pending"></div>
+                  <span>Has Requests</span>
+                </div>
+                <div className="sf-legend-item">
+                  <div className="sf-legend-box sf-legend-box--time-booked"></div>
+                  <span>Booked</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {showConfirm && (
         <ModalConfirmation
           title="Confirm Appointment"
-          message={`Schedule ${form.patient_name || 'this patient'} on ${form.preferred_date ? new Date(form.preferred_date + 'T00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '—'} at ${form.preferred_time || '—'}?`}
+          message={`Schedule ${form.patient_name || 'this patient'} on ${formatDateForDisplay(form.preferred_date)} at ${form.preferred_time}?`}
           confirmText="Yes, Schedule"
           cancelText="Go Back"
           loading={submitting}
           onConfirm={submitAppointment}
           onCancel={() => setShowConfirm(false)}
         />
-      )}
-
-      {showTimeModal && (
-        <Modal 
-          title={`Select Time for ${tempDate?.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`} 
-          onClose={() => setShowTimeModal(false)}
-        >
-          <div style={{ padding: '0 1.5rem 1.5rem' }}>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Click a time slot to confirm your selection.</p>
-            <div className="sf-time-grid">
-              {TIME_SLOTS.map(time => {
-                const isCurrentSelection = form.preferred_time === time && form.preferred_date === formatDateForBackend(tempDate);
-                return (
-                  <button 
-                    key={time} 
-                    className={`sf-time-slot ${isCurrentSelection ? 'sf-time-slot--selected' : ''}`}
-                    onClick={() => selectTime(time)}
-                  >
-                    {time}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </Modal>
       )}
     </div>
   );

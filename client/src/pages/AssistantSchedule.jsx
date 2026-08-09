@@ -76,6 +76,31 @@ const AssistantSchedule = () => {
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  // Format timestamp (created_at) correctly handling UTC timezone
+  const formatSubmittedDateTime = (timestamp) => {
+    if (!timestamp) return '';
+    
+    // Ensure timestamp is interpreted as UTC
+    // Supabase returns ISO strings, but we need to ensure 'Z' is present for proper UTC parsing
+    let isoString = String(timestamp).trim();
+    if (!isoString.endsWith('Z') && !isoString.includes('+')) {
+      // If no timezone indicator, add 'Z' to indicate UTC
+      isoString += 'Z';
+    }
+    
+    // Parse as UTC and convert to local timezone
+    const date = new Date(isoString);
+    
+    return date.toLocaleString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric', 
+      hour: 'numeric', 
+      minute: '2-digit', 
+      hour12: true 
+    }).replace(',', ' -');
+  };
+
   // Actions — go through confirmation
   const requestApprove = (app) => setPendingAction({ type: 'approve', app });
   const requestReject  = (app) => setPendingAction({ type: 'reject',  app });
@@ -169,7 +194,7 @@ const AssistantSchedule = () => {
                       <td>{app.service?.name || '—'}</td>
                       <td>{formatDateForDisplay(app.preferred_date)}</td>
                       <td>{app.preferred_time || '—'}</td>
-                      <td>{new Date(app.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).replace(',', ' -')}</td>
+                      <td>{formatSubmittedDateTime(app.created_at)}</td>
                       <td>
                         <div className="ds-action-btns">
                           {activeTab === 'pending' && (

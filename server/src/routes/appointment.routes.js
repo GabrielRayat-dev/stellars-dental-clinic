@@ -6,6 +6,7 @@ const { authenticate, authorizeStaff } = require('../middlewares/auth');
 // Public routes
 router.post('/status', appointmentController.checkAppointmentStatus);
 router.post('/', appointmentController.createAppointment);
+router.get('/public/availability', appointmentController.getAllAppointments);
 
 // Protected routes — staff only
 router.get('/', authenticate, authorizeStaff, appointmentController.getAllAppointments);
