@@ -47,16 +47,7 @@ const Navbar = () => {
         <span className="navbar__brand-text">Stellar's Dentist Clinic</span>
       </div>
 
-      {/* Hamburger Icon for Mobile */}
-      <button 
-        className="navbar__mobile-toggle" 
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        aria-label="Toggle Menu"
-      >
-        <span className={`hamburger ${mobileMenuOpen ? 'hamburger--open' : ''}`}></span>
-      </button>
-
-      {/* Nav Links */}
+      {/* Mobile Menu Wrapper */}
       <div className={`navbar__menu ${mobileMenuOpen ? 'navbar__menu--open' : ''}`}>
         <ul className="navbar__links">
           {navLinks.map((link) => {
@@ -85,8 +76,19 @@ const Navbar = () => {
             );
           })}
         </ul>
+      </div>
 
-        {/* Auth Action Button */}
+      {/* Actions: Hamburger + Profile / Login */}
+      <div className="navbar__actions">
+        {/* Hamburger Icon for Mobile */}
+        <button 
+          className="navbar__mobile-toggle" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle Menu"
+        >
+          <span className={`hamburger ${mobileMenuOpen ? 'hamburger--open' : ''}`}></span>
+        </button>
+
         {isAuthenticated ? (
           <div
             ref={profileRef}

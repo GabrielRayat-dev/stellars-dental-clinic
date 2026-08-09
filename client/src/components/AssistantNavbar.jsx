@@ -90,15 +90,6 @@ const AssistantNavbar = () => {
         <span className="navbar__brand-text">Stellar's Dentist Clinic</span>
       </div>
 
-      {/* Hamburger Icon for Mobile */}
-      <button 
-        className="navbar__mobile-toggle" 
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        aria-label="Toggle Menu"
-      >
-        <span className={`hamburger ${mobileMenuOpen ? 'hamburger--open' : ''}`}></span>
-      </button>
-
       {/* Mobile Menu Wrapper */}
       <div className={`navbar__menu ${mobileMenuOpen ? 'navbar__menu--open' : ''}`}>
         {/* Nav Links */}
@@ -122,6 +113,18 @@ const AssistantNavbar = () => {
             );
           })}
         </ul>
+      </div>
+
+      {/* Actions: Hamburger + Profile */}
+      <div className="navbar__actions">
+        {/* Hamburger Icon for Mobile */}
+        <button 
+          className="navbar__mobile-toggle" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle Menu"
+        >
+          <span className={`hamburger ${mobileMenuOpen ? 'hamburger--open' : ''}`}></span>
+        </button>
 
         {/* Profile — click to toggle dropdown */}
         <div
