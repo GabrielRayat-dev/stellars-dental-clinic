@@ -414,3 +414,18 @@
     padding: 0.75rem;
   }
 }
+
+@media (max-width: 600px) {
+  .navbar__brand-text {
+    display: none;
+  }
+  
+  .navbar__profile-info,
+  .navbar__chevron {
+    display: none;
+  }
+  
+  .navbar__profile {
+    padding: 0.35rem; /* Tighter padding since it's just a circle now */
+  }
+}

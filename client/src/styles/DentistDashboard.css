@@ -79,11 +79,116 @@
 
 /* Dashboard Content Grid */
 .dashboard-content-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
+
+/* Split Row for 50/50 layout */
+.split-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* ── Responsive: Tablet (≤ 1024px) ── */
+@media (max-width: 1024px) {
+  .dentist-dashboard {
+    padding: 1.5rem 4%;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .split-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .panel-title {
+    font-size: 1.1rem;
+  }
+}
+
+/* ── Responsive: Phone (≤ 600px) ── */
+@media (max-width: 600px) {
+  .dentist-dashboard {
+    padding: 1rem 3%;
+  }
+
+  /* Stats: single column for clean full-width cards */
+  .stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat-card {
+    padding: 0.85rem 0.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .stat-info h3 {
+    font-size: 0.65rem;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
+  }
+
+  .stat-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    align-self: flex-end;
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .stat-icon-wrapper svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Panels */
+  .dashboard-content-grid {
+    gap: 1rem;
+  }
+
+  .dashboard-panel {
+    padding: 1rem 0.85rem;
+  }
+
+  .panel-title {
+    font-size: 1rem;
+  }
+
+  .panel-header {
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Split row: single column */
+  .split-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Remove fixed heights so content doesn't get cut off */
+  .patients-container,
+  .newsfeed-container {
+    max-height: none;
+  }
+}
+
 
 /* Standard Panels */
 .dashboard-panel {
@@ -217,7 +322,7 @@
 
 /* Next Appointments / Bottom Panel */
 .appointments-panel {
-  margin-top: 1.5rem;
+  margin-top: 0;
 }
 
 .appointment-status-badge {

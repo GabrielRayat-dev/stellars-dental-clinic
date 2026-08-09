@@ -6,7 +6,6 @@ import {
   UserCheck,
   XCircle,
   Loader2,
-  TrendingUp,
   Activity,
   AlertCircle,
   Users
@@ -17,6 +16,7 @@ import Header from '../components/Header';
 import Button from '../components/Button';
 import ButtonWithIcons from '../components/ButtonWithIcons';
 import Pagination from '../components/Pagination';
+import CalendarView from '../components/CalendarView';
 import '../styles/Dashboard.css';
 import '../styles/DentistDashboard.css';
 
@@ -126,24 +126,6 @@ const DentistDashboard = () => {
     return timeStr;
   };
 
-  // Process stats for charts
-  const pendingTrend = stats?.appointments?.pending_per_day || [];
-  const chartWidth = 500;
-  const chartHeight = 160;
-  const paddingX = 40;
-  const paddingY = 20;
-
-  // Generate path for trend SVG
-  let polylinePoints = '';
-  if (pendingTrend.length > 1) {
-    const maxVal = Math.max(...pendingTrend.map(d => d.count), 1);
-    polylinePoints = pendingTrend.map((d, index) => {
-      const x = paddingX + (index * (chartWidth - 2 * paddingX)) / (pendingTrend.length - 1);
-      const y = chartHeight - paddingY - (d.count / maxVal) * (chartHeight - 2 * paddingY);
-      return `${x},${y}`;
-    }).join(' ');
-  }
-
   // Paginated Slices
   const pendingApps = appointments.filter(app => app.status === 'pending');
   const totalAppPages = Math.ceil(pendingApps.length / ITEMS_PER_PAGE);
@@ -172,7 +154,7 @@ const DentistDashboard = () => {
         onForward={() => navigate('/dashboard/dentist/schedule')}
       />
 
-      {/* Stats Cards Row */}
+      {/* Row 1: Stats Cards */}
       <div className="stats-row animate-fade-in">
         <div className="stat-card pending" onClick={() => navigate('/dashboard/dentist/schedule')}>
           <div className="stat-info">
@@ -215,134 +197,89 @@ const DentistDashboard = () => {
         </div>
       </div>
 
-      {/* Main Grid Content */}
+      {/* Main Content: Stacked Rows */}
       <div className="dashboard-content-grid animate-fade-in">
-        
-        {/* Left Side: Trends and Upcoming Appointments */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          {/* Trend Chart Panel */}
-          <div className="dashboard-panel">
-            <div className="panel-header">
-              <h4 className="panel-title">
-                <TrendingUp size={18} />
-                Appointment Booking Trend (Last 7 Days)
-              </h4>
-            </div>
-            <div className="chart-container">
-              {pendingTrend.length > 0 ? (
-                <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} width="100%" height="100%">
-                  {/* Grid Lines */}
-                  <line x1={paddingX} y1={paddingY} x2={chartWidth - paddingX} y2={paddingY} className="chart-grid-line" />
-                  <line x1={paddingX} y1={chartHeight / 2} x2={chartWidth - paddingX} y2={chartHeight / 2} className="chart-grid-line" />
-                  <line x1={paddingX} y1={chartHeight - paddingY} x2={chartWidth - paddingX} y2={chartHeight - paddingY} className="chart-grid-line" />
 
-                  {/* Line Path */}
-                  {polylinePoints && (
-                    <polyline
-                      fill="none"
-                      stroke="var(--primary-green)"
-                      strokeWidth="3"
-                      points={polylinePoints}
-                    />
-                  )}
-
-                  {/* Draw Dots and Labels */}
-                  {pendingTrend.map((d, index) => {
-                    const maxVal = Math.max(...pendingTrend.map(val => val.count), 1);
-                    const x = paddingX + (index * (chartWidth - 2 * paddingX)) / (pendingTrend.length - 1);
-                    const y = chartHeight - paddingY - (d.count / maxVal) * (chartHeight - 2 * paddingY);
-                    
-                    return (
-                      <g key={index}>
-                        <circle cx={x} cy={y} r="5" fill="var(--gold-accent)" stroke="var(--primary-green)" strokeWidth="2" />
-                        <text x={x} y={y - 10} textAnchor="middle" fontSize="10" fontWeight="bold" fill="var(--text-dark)">
-                          {d.count}
-                        </text>
-                        <text x={x} y={chartHeight - 4} textAnchor="middle" className="chart-axis-label">
-                          {d.date.slice(5)} {/* MM-DD */}
-                        </text>
-                      </g>
-                    );
-                  })}
-                </svg>
-              ) : (
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No recent activity to chart</div>
-              )}
-            </div>
+        {/* Row 2: Appointment Calendar (full width) */}
+        <div className="dashboard-panel">
+          <div className="panel-header">
+            <h4 className="panel-title">
+              <Calendar size={18} />
+              Appointment Schedule
+            </h4>
           </div>
-
-          {/* Upcoming Appointments Table Panel */}
-          <div className="dashboard-panel appointments-panel">
-            <div className="panel-header">
-              <h4 className="panel-title">
-                <Calendar size={18} />
-                Upcoming Appointments List
-              </h4>
-              <ButtonWithIcons
-                iconName="Calendar"
-                label="View Schedule"
-                variant="default"
-                onClick={() => navigate('/dashboard/dentist/schedule')}
-              />
-            </div>
-            <div style={{ overflowX: 'auto' }}>
-              {displayedAppointments.length > 0 ? (
-                <>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '2px solid var(--border-light)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                        <th style={{ padding: '0.75rem' }}>Patient Name</th>
-                        <th style={{ padding: '0.75rem' }}>Date</th>
-                        <th style={{ padding: '0.75rem' }}>Time</th>
-                        <th style={{ padding: '0.75rem' }}>Service</th>
-                        <th style={{ padding: '0.75rem' }}>Status</th>
-                        <th style={{ padding: '0.75rem' }}>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {displayedAppointments.map((app) => (
-                        <tr key={app.id} style={{ borderBottom: '1px solid var(--border-light)', fontSize: '0.9rem' }}>
-                          <td style={{ padding: '0.75rem', fontWeight: 500 }}>{app.patient_name || 'N/A'}</td>
-                          <td style={{ padding: '0.75rem' }}>{app.preferred_date ? new Date(app.preferred_date).toLocaleDateString() : 'N/A'}</td>
-                          <td style={{ padding: '0.75rem' }}>{formatTimeForDisplay(app.preferred_time)}</td>
-                          <td style={{ padding: '0.75rem' }}>{app.service?.name || 'N/A'}</td>
-                          <td style={{ padding: '0.75rem' }}>
-                            <span className={`appointment-status-badge ${app.status}`}>
-                              {app.status}
-                            </span>
-                          </td>
-                          <td style={{ padding: '0.75rem' }}>
-                            <ButtonWithIcons
-                              iconName="Calendar"
-                              label="Manage"
-                              variant="default"
-                              onClick={() => navigate(`/dashboard/dentist/schedule`)}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <Pagination
-                    currentPage={appointmentsPage}
-                    totalPages={totalAppPages}
-                    onPageChange={setAppointmentsPage}
-                  />
-                </>
-              ) : (
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', padding: '1rem 0' }}>
-                  No pending appointments scheduled.
-                </p>
-              )}
-            </div>
-          </div>
-
+          <CalendarView appointments={appointments} />
         </div>
 
-        {/* Right Side: Recent Patients and Newsfeed/Audit Logs */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
+        {/* Row 3: Upcoming Appointments List (full width) */}
+        <div className="dashboard-panel" style={{ marginTop: 0 }}>
+          <div className="panel-header">
+            <h4 className="panel-title">
+              <Calendar size={18} />
+              Upcoming Appointments List
+            </h4>
+            <ButtonWithIcons
+              iconName="Calendar"
+              label="View Schedule"
+              variant="default"
+              onClick={() => navigate('/dashboard/dentist/schedule')}
+            />
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            {displayedAppointments.length > 0 ? (
+              <>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid var(--border-light)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                      <th style={{ padding: '0.75rem' }}>Patient Name</th>
+                      <th style={{ padding: '0.75rem' }}>Date</th>
+                      <th style={{ padding: '0.75rem' }}>Time</th>
+                      <th style={{ padding: '0.75rem' }}>Service</th>
+                      <th style={{ padding: '0.75rem' }}>Status</th>
+                      <th style={{ padding: '0.75rem' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayedAppointments.map((app) => (
+                      <tr key={app.id} style={{ borderBottom: '1px solid var(--border-light)', fontSize: '0.9rem' }}>
+                        <td style={{ padding: '0.75rem', fontWeight: 500 }}>{app.patient_name || 'N/A'}</td>
+                        <td style={{ padding: '0.75rem' }}>{app.preferred_date ? new Date(app.preferred_date).toLocaleDateString() : 'N/A'}</td>
+                        <td style={{ padding: '0.75rem' }}>{formatTimeForDisplay(app.preferred_time)}</td>
+                        <td style={{ padding: '0.75rem' }}>{app.service?.name || 'N/A'}</td>
+                        <td style={{ padding: '0.75rem' }}>
+                          <span className={`appointment-status-badge ${app.status}`}>
+                            {app.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.75rem' }}>
+                          <ButtonWithIcons
+                            iconName="Calendar"
+                            label="Manage"
+                            variant="default"
+                            onClick={() => navigate(`/dashboard/dentist/schedule`)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <Pagination
+                  currentPage={appointmentsPage}
+                  totalPages={totalAppPages}
+                  onPageChange={setAppointmentsPage}
+                />
+              </>
+            ) : (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', padding: '1rem 0' }}>
+                No pending appointments scheduled.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Row 4: Recent Patients + Logs Feed (50/50) */}
+        <div className="split-row">
+
           {/* Recent Patients Panel */}
           <div className="dashboard-panel">
             <div className="panel-header">
@@ -392,7 +329,7 @@ const DentistDashboard = () => {
             </div>
           </div>
 
-          {/* Newsfeed / Audit Logs Panel */}
+          {/* Recent Logs Feed Panel */}
           <div className="dashboard-panel">
             <div className="panel-header">
               <h4 className="panel-title">
