@@ -278,3 +278,35 @@
   background: var(--primary-green);
   color: #fff;
 }
+
+/* ── Responsive: Tablet (≤ 1024px) ── */
+@media (max-width: 1024px) {
+  .ds-page {
+    padding: 1.5rem 4%;
+  }
+}
+
+/* ── Responsive: Phone (≤ 600px) ── */
+@media (max-width: 600px) {
+  .ds-page {
+    padding: 1rem 3%;
+  }
+
+  .ds-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .ds-tabs {
+    flex-wrap: wrap;
+    justify-content: stretch;
+  }
+
+  .ds-tabs .bwi-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.6rem;
+    font-size: 0.8rem;
+  }
+}

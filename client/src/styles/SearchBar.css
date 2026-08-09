@@ -28,3 +28,9 @@
 .sb-input::placeholder {
   color: var(--text-muted);
 }
+
+@media (max-width: 600px) {
+  .sb-wrap {
+    max-width: 100%;
+  }
+}

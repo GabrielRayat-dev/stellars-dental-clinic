@@ -57,3 +57,27 @@
   font-style: italic;
   opacity: 0.9;
 }
+
+/* ── Responsive: Phone (≤ 600px) ── */
+@media (max-width: 600px) {
+  .header__nav-btn {
+    display: none;
+  }
+  
+  /* Also hide the empty placeholder divs used when no button is passed */
+  .header > div[style*="width: 36px"] {
+    display: none;
+  }
+
+  .header__text {
+    padding: 0;
+  }
+
+  .header__title {
+    font-size: 1.6rem;
+  }
+  
+  .header__subtitle {
+    font-size: 0.85rem;
+  }
+}

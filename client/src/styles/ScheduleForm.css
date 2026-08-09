@@ -62,13 +62,37 @@
   .sf-integrated-layout {
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
+    min-height: auto;
+  }
+  .sf-card {
+    padding: 2rem 1.5rem;
   }
 }
 
 @media (max-width: 768px) {
   .sf-integrated-layout {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
+  }
+  .sf-card {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .sf-card {
+    padding: 1rem 0.5rem;
+    border: none;
+  }
+  .sf-integrated-layout {
+    gap: 1.5rem;
+  }
+  .sf-calendar-column,
+  .sf-timeslots-column {
+    padding: 0.5rem;
+  }
+  .sf-time-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -99,6 +123,8 @@
 }
 
 .sf-input {
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.6rem 0.8rem;
   border: 1px solid var(--border-light);
   font-family: var(--font-serif);
@@ -115,6 +141,8 @@
 }
 
 .sf-submit-btn {
+  width: 100%;
+  box-sizing: border-box;
   margin-top: 1rem;
   background: var(--primary-green);
   color: #fff;

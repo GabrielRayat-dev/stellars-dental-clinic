@@ -1,0 +1,79 @@
+/* ── Patient Details Page ─────────────────────── */
+.pd-tabs-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+  flex-wrap: wrap;
+}
+
+.pd-tab-btn {
+  padding: 1rem 0.5rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1; /* Stretch on small screens */
+  min-width: 150px;
+}
+
+.pd-tab-btn--active {
+  border-bottom: 2px solid var(--primary-green);
+  color: var(--primary-green);
+  font-weight: 600;
+}
+
+.pd-content {
+  /* Inherits from page padding, no extra nested padding on mobile */
+}
+
+.pd-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.pd-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* ── Responsive: Tablet (≤ 1024px) ── */
+@media (max-width: 1024px) {
+  .pd-tabs-container {
+    gap: 0.5rem;
+  }
+}
+
+/* ── Responsive: Phone (≤ 600px) ── */
+@media (max-width: 600px) {
+  .pd-controls {
+    flex-wrap: wrap;
+    justify-content: stretch;
+  }
+
+  .pd-controls > * {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .pd-profile-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .pd-tabs-container {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .pd-tab-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

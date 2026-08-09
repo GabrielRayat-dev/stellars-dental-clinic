@@ -4,6 +4,10 @@
   border-radius: 0;
   border: 1px solid var(--border-light);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.st-table-scroll {
+  width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }

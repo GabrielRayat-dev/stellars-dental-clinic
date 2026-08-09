@@ -10,6 +10,7 @@ import Modal from '../components/Modal';
 import ModalConfirmation from '../components/ModalConfirmation';
 import { useAuth } from '../context/AuthContext';
 import '../styles/DentistSchedule.css';
+import '../styles/DentistPatientDetails.css';
 
 const DentistPatientDetails = () => {
   const { id } = useParams();
@@ -199,22 +200,22 @@ const DentistPatientDetails = () => {
         onBack={() => navigate('/dashboard/dentist/patients')}
       />
 
-      <div style={{ display: 'flex', gap: '1rem', padding: '0 2rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-light)' }}>
+      <div className="pd-tabs-container">
         <button 
           onClick={() => setActiveTab('Profile')} 
-          style={{ padding: '1rem 0.5rem', background: 'none', border: 'none', borderBottom: activeTab === 'Profile' ? '2px solid var(--primary-green)' : '2px solid transparent', color: activeTab === 'Profile' ? 'var(--primary-green)' : 'var(--text-muted)', fontWeight: activeTab === 'Profile' ? 600 : 400, cursor: 'pointer', transition: 'all 0.2s' }}
+          className={`pd-tab-btn ${activeTab === 'Profile' ? 'pd-tab-btn--active' : ''}`}
         >
           Personal Info
         </button>
         <button 
           onClick={() => setActiveTab('Diagnosis')} 
-          style={{ padding: '1rem 0.5rem', background: 'none', border: 'none', borderBottom: activeTab === 'Diagnosis' ? '2px solid var(--primary-green)' : '2px solid transparent', color: activeTab === 'Diagnosis' ? 'var(--primary-green)' : 'var(--text-muted)', fontWeight: activeTab === 'Diagnosis' ? 600 : 400, cursor: 'pointer', transition: 'all 0.2s' }}
+          className={`pd-tab-btn ${activeTab === 'Diagnosis' ? 'pd-tab-btn--active' : ''}`}
         >
           Diagnosis & Records
         </button>
       </div>
 
-      <div style={{ padding: '0 2rem' }}>
+      <div className="pd-content">
         {/* ── PROFILE TAB ── */}
         {activeTab === 'Profile' && (
           <div style={{ background: '#fff', border: '1px solid var(--border-light)', borderRadius: '8px', overflow: 'hidden' }}>
@@ -223,7 +224,7 @@ const DentistPatientDetails = () => {
               <h3 style={{ margin: 0, color: '#fff', fontWeight: 600, fontSize: '1rem' }}>Personal Information</h3>
             </div>
             <div style={{ padding: '2rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div className="pd-profile-grid">
               <div><strong style={{ color: 'var(--text-muted)' }}>Full Name:</strong> <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{patient.name}</div></div>
               <div><strong style={{ color: 'var(--text-muted)' }}>Phone Number:</strong> <div>{patient.phone_number}</div></div>
               <div><strong style={{ color: 'var(--text-muted)' }}>Age & Sex:</strong> <div>{patient.age} / {patient.sex}</div></div>
@@ -240,7 +241,7 @@ const DentistPatientDetails = () => {
         {/* ── DIAGNOSIS TAB ── */}
         {activeTab === 'Diagnosis' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginBottom: '1rem' }}>
+            <div className="pd-controls">
               <ButtonWithIcons
                 iconName="Plus"
                 label="Add Record"
@@ -397,7 +398,7 @@ const DentistPatientDetails = () => {
               <textarea value={diagnosisForm.treatment} onChange={e => setDiagnosisForm({...diagnosisForm, treatment: e.target.value})} required rows={2} style={{ padding: '0.65rem', border: '1px solid var(--border-light)', outline: 'none', resize: 'vertical' }} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gap: '1rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Amount Paid (₱)</label>
                 <input type="number" min="0" value={diagnosisForm.amount_paid} onChange={e => setDiagnosisForm({...diagnosisForm, amount_paid: e.target.value})} style={{ padding: '0.65rem', border: '1px solid var(--border-light)', outline: 'none' }} />

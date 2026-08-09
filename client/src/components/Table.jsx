@@ -9,17 +9,19 @@ export const TableWrap = ({ children }) => (
 
 export const Table = ({ headers, children }) => {
   return (
-    <table className="st-table">
-      <thead>
-        <tr>
-          {headers.map((h, i) => (
-            <th key={i}>{h}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {children}
-      </tbody>
-    </table>
+    <div className="st-table-scroll">
+      <table className="st-table">
+        <thead>
+          <tr>
+            {headers.map((h, i) => (
+              <th key={i}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {children}
+        </tbody>
+      </table>
+    </div>
   );
 };
