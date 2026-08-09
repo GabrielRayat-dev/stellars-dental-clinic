@@ -29,7 +29,7 @@
 }
 
 .ds-tabs .bwi-btn {
-  opacity: 0.65;
+  opacity: 1;
   transition: opacity 0.2s ease;
 }
 

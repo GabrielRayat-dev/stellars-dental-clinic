@@ -39,7 +39,7 @@
 /* ── Integrated Layout: 3 Columns ─────────────────────── */
 .sf-integrated-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.45fr) minmax(0, 1.15fr);
   gap: 2rem;
   min-height: 600px;
 }
@@ -222,15 +222,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Has at least 1 appointment: orange color */
-.sf-day--has-appointments {
-  border-color: #ff9800;
-  color: #ff9800;
-}
 
-.sf-day--has-appointments .sf-day-number {
-  color: #ff9800;
-}
 
 /* Selected day: highlighted */
 .sf-day--selected {
@@ -255,23 +247,51 @@
   cursor: not-allowed;
 }
 
-/* Fully booked: low opacity and not clickable */
+/* Fully booked: greyish and not clickable */
 .sf-day--fully-booked {
-  opacity: 0.4;
+  opacity: 1;
   cursor: not-allowed;
-  background: #e8e8e8;
-  border-color: #999;
-  color: #999;
+  background: #d6d6d6;
+  border-color: #c0c0c0;
 }
 
 .sf-day--fully-booked .sf-day-number {
-  color: #999;
+  color: #fff;
 }
 
 .sf-day--fully-booked:hover {
   transform: none;
   box-shadow: none;
-  background: #e8e8e8;
+  background: #d6d6d6;
+}
+
+/* Pending days */
+.sf-day--has-pending {
+  background: #e6d3a1;
+  border-color: #d1b876;
+}
+.sf-day--has-pending .sf-day-number {
+  color: #fff;
+}
+
+/* Badge */
+.sf-day-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  background: #deb860;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  z-index: 2;
 }
 
 /* ── Calendar Legend ─────────────────────── */
@@ -303,15 +323,17 @@
   background: #ffffff;
 }
 
+
+
 .sf-legend-box--has-requests {
-  background: #ff9800;
-  border: 1px solid #ff9800;
+  background: #e6d3a1;
+  border: 1px solid #d1b876;
 }
 
 .sf-legend-box--fully-booked {
-  background: #f0f0f0;
-  border: 1px solid #bbb;
-  opacity: 0.5;
+  background: #d6d6d6;
+  border: 1px solid #c0c0c0;
+  opacity: 1;
 }
 
 /* ── Right Column: Time Slots ─────────────────────── */
@@ -340,7 +362,7 @@
 
 .sf-time-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.8rem;
   flex: 1;
   margin-bottom: 1rem;
@@ -379,16 +401,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Pending requests: orange color with badge showing count */
-.sf-time-slot--pending {
-  border-color: #ff9800;
-  color: #ff9800;
-  background: #fff8f0;
-}
 
-.sf-time-slot--pending .sf-time-slot-time {
-  color: #ff9800;
-}
 
 /* Selected time slot */
 .sf-time-slot--selected {
@@ -401,39 +414,54 @@
   color: #ffffff;
 }
 
-/* Booked/Approved: low opacity, not clickable */
+/* Booked/Approved: greyish, not clickable */
 .sf-time-slot--booked {
-  opacity: 0.5;
+  opacity: 1;
   cursor: not-allowed;
-  background: #f0f0f0;
-  border-color: #bbb;
-  color: var(--text-muted);
+  background: #d6d6d6;
+  border-color: #c0c0c0;
+}
+
+.sf-time-slot--booked .sf-time-slot-time {
+  color: #fff;
 }
 
 .sf-time-slot--booked:hover {
   transform: none;
   box-shadow: none;
-  background: #f0f0f0;
+  background: #d6d6d6;
+}
+
+/* Pending requests in timeslot */
+.sf-time-slot--pending {
+  background: #e6d3a1;
+  border-color: #d1b876;
+}
+.sf-time-slot--pending .sf-time-slot-time {
+  color: #fff;
 }
 
 /* Badge for pending count */
 .sf-time-slot-badge {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: -6px;
+  right: -6px;
   width: 22px;
   height: 22px;
-  background: #ff9800;
+  background: #deb860;
   color: #ffffff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem;
-  font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 600;
   border: 2px solid #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  z-index: 2;
 }
+
+
 
 /* ── Time Slots Legend ─────────────────────── */
 .sf-timeslots-legend {
@@ -449,14 +477,16 @@
   background: #ffffff;
 }
 
+
+
 .sf-legend-box--time-pending {
-  background: #ff9800;
-  border: 1px solid #ff9800;
+  background: #e6d3a1;
+  border: 1px solid #d1b876;
 }
 
 .sf-legend-box--time-booked {
-  background: #f0f0f0;
-  border: 1px solid #bbb;
-  opacity: 0.5;
+  background: #d6d6d6;
+  border: 1px solid #c0c0c0;
+  opacity: 1;
 }
 

@@ -33,7 +33,9 @@ const DentistNavbar = () => {
   const { user, token, logout } = useAuth();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const profileRef = useRef(null);
+  const navRef = useRef(null);
 
   // Update Profile Modal States
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -47,6 +49,9 @@ const DentistNavbar = () => {
     const handleOutsideClick = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setDropdownOpen(false);
+      }
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setMobileMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleOutsideClick);
@@ -83,82 +88,102 @@ const DentistNavbar = () => {
   };
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" ref={navRef}>
       {/* Logo */}
       <div className="navbar__brand" onClick={() => navigate('/dashboard/dentist')}>
         <img src={logo} alt="Stellar's Logo" className="navbar__logo" />
         <span className="navbar__brand-text">Stellar's Dentist Clinic</span>
       </div>
 
-      {/* Nav Links */}
-      <ul className="navbar__links">
-        {dentistNavLinks.map(({ label, path, icon: Icon }) => {
-          const isActive = location.pathname === path;
-          return (
-            <li key={label}>
-              <button
-                className={`navbar__link ${isActive ? 'navbar__link--active' : ''}`}
-                onClick={() => navigate(path)}
-              >
-                <Icon size={16} className="navbar__link-icon" />
-                <span>{label}</span>
-                {isActive && <span className="navbar__link-indicator" />}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-
-      {/* Profile — click to toggle dropdown */}
-      <div
-        ref={profileRef}
-        className={`navbar__profile ${dropdownOpen ? 'navbar__profile--open' : ''}`}
-        onClick={() => setDropdownOpen((prev) => !prev)}
+      {/* Hamburger Icon for Mobile */}
+      <button 
+        className="navbar__mobile-toggle" 
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        aria-label="Toggle Menu"
       >
-        <div className="navbar__avatar">{initials}</div>
-        <div className="navbar__profile-info">
-          <span className="navbar__profile-name">{user?.name || 'Dentist'}</span>
-          <span className="navbar__profile-role">Dentist</span>
-        </div>
-        <ChevronDown
-          size={14}
-          className={`navbar__chevron ${dropdownOpen ? 'navbar__chevron--open' : ''}`}
-        />
+        <span className={`hamburger ${mobileMenuOpen ? 'hamburger--open' : ''}`}></span>
+      </button>
 
-        {/* Dropdown — controlled by state */}
-        {dropdownOpen && (
-          <div className="navbar__dropdown">
-            <div className="navbar__dropdown-info">
-              <span className="navbar__dropdown-name">{user?.name || 'Dentist'}</span>
-              <span className="navbar__dropdown-role">{user?.role || 'Dentist'}</span>
-              {user?.email && <span className="navbar__dropdown-detail">{user.email}</span>}
-              {user?.phone_number && <span className="navbar__dropdown-detail">{user.phone_number}</span>}
-            </div>
-            <button
-              className="navbar__dropdown-item"
-              style={{ color: 'var(--primary-green)', fontWeight: 600 }}
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                setUpdateName(user?.name || '');
-                setUpdatePhone(user?.phone_number || '');
-                setUpdateError('');
-                setIsUpdateModalOpen(true);
-                setDropdownOpen(false);
-              }}
-            >
-              <UserCog size={14} />
-              Update Profile
-            </button>
-            <button
-              className="navbar__dropdown-item"
-              style={{ background: 'var(--error-red)', color: '#fff', marginTop: '0.25rem', borderRadius: '4px' }}
-              onClick={(e) => { e.stopPropagation(); logout(); }}
-            >
-              <LogOut size={14} color="#fff" />
-              Sign out
-            </button>
+      {/* Mobile Menu Wrapper */}
+      <div className={`navbar__menu ${mobileMenuOpen ? 'navbar__menu--open' : ''}`}>
+        {/* Nav Links */}
+        <ul className="navbar__links">
+          {dentistNavLinks.map(({ label, path, icon: Icon }) => {
+            const isActive = location.pathname === path;
+            return (
+              <li key={label}>
+                <button
+                  className={`navbar__link ${isActive ? 'navbar__link--active' : ''}`}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate(path);
+                  }}
+                >
+                  <Icon size={16} className="navbar__link-icon" />
+                  <span>{label}</span>
+                  {isActive && <span className="navbar__link-indicator" />}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* Profile — click to toggle dropdown */}
+        <div
+          ref={profileRef}
+          className={`navbar__profile ${dropdownOpen ? 'navbar__profile--open' : ''}`}
+          onClick={() => setDropdownOpen((prev) => !prev)}
+        >
+          <div className="navbar__avatar">{initials}</div>
+          <div className="navbar__profile-info">
+            <span className="navbar__profile-name">{user?.name || 'Dentist'}</span>
+            <span className="navbar__profile-role">Dentist</span>
           </div>
-        )}
+          <ChevronDown
+            size={14}
+            className={`navbar__chevron ${dropdownOpen ? 'navbar__chevron--open' : ''}`}
+          />
+
+          {/* Dropdown — controlled by state */}
+          {dropdownOpen && (
+            <div className="navbar__dropdown">
+              <div className="navbar__dropdown-info">
+                <span className="navbar__dropdown-name">{user?.name || 'Dentist'}</span>
+                <span className="navbar__dropdown-role">{user?.role || 'Dentist'}</span>
+                {user?.email && <span className="navbar__dropdown-detail">{user.email}</span>}
+                {user?.phone_number && <span className="navbar__dropdown-detail">{user.phone_number}</span>}
+              </div>
+              <button
+                className="navbar__dropdown-item"
+                style={{ color: 'var(--primary-green)', fontWeight: 600 }}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setMobileMenuOpen(false);
+                  setUpdateName(user?.name || '');
+                  setUpdatePhone(user?.phone_number || '');
+                  setUpdateError('');
+                  setIsUpdateModalOpen(true);
+                  setDropdownOpen(false);
+                }}
+              >
+                <UserCog size={14} />
+                Update Profile
+              </button>
+              <button
+                className="navbar__dropdown-item"
+                style={{ background: 'var(--error-red)', color: '#fff', marginTop: '0.25rem', borderRadius: '4px' }}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setMobileMenuOpen(false);
+                  logout(); 
+                }}
+              >
+                <LogOut size={14} color="#fff" />
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Update Profile Modal */}

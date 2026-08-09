@@ -648,13 +648,23 @@
   animation: lp-shimmer 1.4s infinite;
 }
 
-/* ── CTA ───────────────────────────────────────────── */
-.lp-cta {
-  padding: 6rem 8%;
-  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-hover) 100%);
-  position: relative;
-  overflow: hidden;
+/* ── BOOKING SECTION (inline, replaces CTA + modal) ── */
+.lp-booking-section {
+  padding: 7rem 8%;
+  background: var(--bg-mint);
 }
+
+.lp-booking-section__form {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.lp-booking-section .sf-card {
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 8px 32px rgba(61, 118, 85, 0.08);
+}
+
 
 .lp-cta::before {
   content: '';

@@ -216,30 +216,18 @@ const Faqs = ({ faqs, loading }) => {
   );
 };
 
-/* ── Section: Book Appointment CTA ───────────────── */
-const BookCta = ({ onBookClick }) => (
-  <section className="lp-cta" id="appointment">
-    <div className="lp-cta__inner animate-fade-in">
-      <span className="lp-section-eyebrow lp-section-eyebrow--light">Ready to Start?</span>
-      <h2 className="lp-cta__title">Book Your Appointment Today</h2>
-      <p className="lp-cta__sub">Check your appointment status or schedule a new visit — online, anytime.</p>
-      <div className="lp-cta__btns">
-        <button className="lp-btn lp-btn--gold" onClick={onBookClick} id="cta-book-btn">
-          <CalendarCheck size={18} /> Schedule Appointment
-        </button>
-      </div>
+/* ── Section: Inline Booking ─────────────────────── */
+const BookingSection = () => (
+  <section className="lp-booking-section" id="appointment">
+    <div className="lp-section-header">
+      <span className="lp-section-eyebrow">Book Online</span>
+      <h2 className="lp-section-title">Book Your Appointment</h2>
+      <p className="lp-section-sub">Fill in your details, pick a date and time, and we'll confirm your appointment shortly.</p>
     </div>
-  </section>
-);
-
-/* ── Appointment Modal (wraps existing ScheduleForm) ─ */
-const AppointmentModal = ({ onClose }) => (
-  <div className="lp-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-    <div className="lp-modal lp-modal--form animate-fade-in">
-      <button className="lp-modal__close" onClick={onClose} id="modal-close-btn">✕</button>
+    <div className="lp-booking-section__form">
       <ScheduleForm publicMode />
     </div>
-  </div>
+  </section>
 );
 
 /* ── Main Landing Page ───────────────────────────── */
@@ -251,7 +239,6 @@ const Landing = () => {
   const [loadingSvc, setLoadingSvc] = useState(true);
   const [loadingDen, setLoadingDen] = useState(true);
   const [loadingFaq, setLoadingFaq] = useState(true);
-  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetch('/api/services/public')
@@ -273,23 +260,22 @@ const Landing = () => {
       .finally(() => setLoadingFaq(false));
   }, []);
 
-  const openModal = () => setShowModal(true);
-  const closeModal = () => setShowModal(false);
+  const scrollToBooking = () => {
+    document.getElementById('appointment')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <div className="lp-root">
       <div className="lp-bg-blob-top" />
 
-      <Hero onBookClick={openModal} />
+      <Hero onBookClick={scrollToBooking} />
       <StatsBanner />
       <About />
       <Services services={services} loading={loadingSvc} />
-      <HowItWorks onBookClick={openModal} />
+      <HowItWorks onBookClick={scrollToBooking} />
       <Dentists dentists={dentists} loading={loadingDen} />
       <Faqs faqs={faqs} loading={loadingFaq} />
-      <BookCta onBookClick={openModal} />
-
-      {showModal && <AppointmentModal onClose={closeModal} />}
+      <BookingSection />
     </div>
   );
 };

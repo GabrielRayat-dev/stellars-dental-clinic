@@ -4,7 +4,6 @@ import { Calendar, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import ScheduleForm from '../components/ScheduleForm';
-import AppointmentCalendar from '../components/AppointmentCalendar';
 import AdminPagination from '../components/AdminPagination';
 import ButtonWithIcons from '../components/ButtonWithIcons';
 import SearchBar from '../components/SearchBar';
@@ -16,7 +15,7 @@ const DentistSchedule = () => {
   const navigate = useNavigate();
   const { token, user } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('calendar'); // 'calendar' | 'pending' | 'approved' | 'schedule'
+  const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved' | 'schedule'
   const [searchQuery, setSearchQuery] = useState('');
   
   // Pagination
@@ -153,12 +152,6 @@ const DentistSchedule = () => {
         />
         <div className="ds-tabs">
           <ButtonWithIcons 
-            iconName="Calendar" 
-            label="View Calendar" 
-            active={activeTab === 'calendar'} 
-            onClick={() => setActiveTab('calendar')} 
-          />
-          <ButtonWithIcons 
             iconName="Clock" 
             label="Pending Requests" 
             active={activeTab === 'pending'} 
@@ -189,16 +182,7 @@ const DentistSchedule = () => {
         </div>
       ) : (
         <>
-          {/* ── Calendar View ── */}
-          {activeTab === 'calendar' && (
-            <AppointmentCalendar 
-              appointments={appointments}
-              onTimeSlotSelect={(selectedDate, time) => {
-                // Show the schedule form when a time slot is selected
-                setActiveTab('schedule');
-              }}
-            />
-          )}
+
 
           {/* ── Pending & Approved Tables ── */}
           {(activeTab === 'pending' || activeTab === 'approved') && (

@@ -19,9 +19,20 @@ export const AuthProvider = ({ children }) => {
       fetch('/api/auth/profile', {
         headers: { Authorization: `Bearer ${savedToken}` }
       })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          if (res.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setToken(null);
+            setUser(null);
+          }
+          throw new Error('Failed to fetch profile');
+        }
+        return res.json();
+      })
       .then(data => {
-        if (data.data) {
+        if (data && data.data) {
           setUser(data.data);
           localStorage.setItem('user', JSON.stringify(data.data));
         }

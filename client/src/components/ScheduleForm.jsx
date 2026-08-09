@@ -25,11 +25,37 @@ const format12h = (time24) => {
   return `${h12}:${minutes} ${ampm}`;
 };
 
+// Convert any time format to "HH:MM" 24h for reliable comparison.
+// Handles: "08:00:00" (DB/postgres), "08:00", "8:00 AM", "10:00 PM"
+const toHHMM = (timeStr) => {
+  if (!timeStr) return '';
+  const str = timeStr.trim();
+
+  // "HH:MM:SS" or "HH:MM" — already 24h
+  const match24 = str.match(/^(\d{1,2}):(\d{2})(:\d{2})?$/);
+  if (match24) {
+    return `${String(parseInt(match24[1])).padStart(2, '0')}:${match24[2]}`;
+  }
+
+  // "8:00 AM" / "12:00 PM" — 12h format
+  const match12 = str.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (match12) {
+    let h = parseInt(match12[1]);
+    const m = match12[2];
+    const ampm = match12[3].toUpperCase();
+    if (ampm === 'AM' && h === 12) h = 0;
+    if (ampm === 'PM' && h !== 12) h += 12;
+    return `${String(h).padStart(2, '0')}:${m}`;
+  }
+
+  return str;
+};
+
 const analyzeTimeSlot = (date, time, appointments) => {
+  // `time` is already "HH:MM" (e.g. "08:00") from TIME_SLOTS
   const dateStr = getLocalDateString(date);
-  const timeDisplay = format12h(time);
   const slotAppointments = appointments.filter(app => {
-    return app.preferred_date === dateStr && app.preferred_time === timeDisplay;
+    return app.preferred_date === dateStr && toHHMM(app.preferred_time) === time;
   });
 
   const hasPending = slotAppointments.some(app => app.status === 'pending');
@@ -42,6 +68,8 @@ const analyzeTimeSlot = (date, time, appointments) => {
 const analyzeDateStatus = (date, appointments) => {
   const dateStr = getLocalDateString(date);
   const dateAppointments = appointments.filter(app => app.preferred_date === dateStr);
+  const totalPendingCount = dateAppointments.filter(app => app.status === 'pending').length;
+  const hasPending = totalPendingCount > 0;
   const hasAppointments = dateAppointments.length > 0;
   
   const approvedPerSlot = TIME_SLOTS.map(time => {
@@ -49,7 +77,7 @@ const analyzeDateStatus = (date, appointments) => {
   });
   const isFullyBooked = TIME_SLOTS.length > 0 && approvedPerSlot.every(b => b);
 
-  return { hasAppointments, isFullyBooked };
+  return { hasPending, totalPendingCount, hasAppointments, isFullyBooked };
 };
 
 const ScheduleForm = ({ onSuccess, publicMode = false }) => {
@@ -59,7 +87,6 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
 
   // Success state
   const [submitted, setSubmitted] = useState(false);
-  const [trackingNumber, setTrackingNumber] = useState('');
   
   // Form State
   const emptyForm = {
@@ -217,7 +244,6 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
       setSelectedDate(null);
 
       if (publicMode) {
-        setTrackingNumber(json.data?.tracking_number || json.data?.id || '');
         setSubmitted(true);
       } else {
         if (onSuccess) onSuccess();
@@ -229,31 +255,8 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
     }
   };
 
-  if (submitted && publicMode) {
-    return (
-      <div className="sf-container">
-        <div className="sf-card">
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '1rem 0' }}>
-            <CheckCircle2 size={52} color="var(--primary-green)" />
-            <h2 className="sf-title">Appointment Submitted!</h2>
-            <p className="sf-subtitle" style={{ marginBottom: 0 }}>Your appointment request has been received. We'll confirm it shortly.</p>
-            {trackingNumber && (
-              <div style={{ background: 'var(--primary-green-light)', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '0.6rem 1.5rem', fontSize: '0.9rem', color: 'var(--text-dark)' }}>
-                Tracking #: <strong>{trackingNumber}</strong>
-              </div>
-            )}
-            <button
-              className="sf-submit-btn"
-              style={{ marginTop: '0.5rem', maxWidth: '220px' }}
-              onClick={() => { setSubmitted(false); setTrackingNumber(''); }}
-            >
-              Book Another
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
+
 
   return (
     <div className="sf-container">
@@ -334,7 +337,7 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
                 today.setHours(0, 0, 0, 0);
                 const isPast = date < today;
                 
-                const { hasAppointments, isFullyBooked } = analyzeDateStatus(date, appointments);
+                const { hasPending, totalPendingCount, hasAppointments, isFullyBooked } = analyzeDateStatus(date, appointments);
 
                 return (
                   <div
@@ -342,19 +345,21 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
                     className={`sf-day 
                       ${isSelected ? 'sf-day--selected' : ''} 
                       ${isToday ? 'sf-day--today' : ''} 
-                      ${hasAppointments && !isFullyBooked ? 'sf-day--has-appointments' : ''}
+                      ${hasPending && !isFullyBooked ? 'sf-day--has-pending' : ''}
                       ${isFullyBooked ? 'sf-day--fully-booked' : ''}
                       ${isPast ? 'sf-day--past' : ''}
                     `}
                     onClick={() => !isPast && !isFullyBooked && handleDateClick(date)}
                   >
                     <span className="sf-day-number">{date.getDate()}</span>
+                    {hasPending && !isFullyBooked && (
+                      <div className="sf-day-badge">{totalPendingCount}</div>
+                    )}
                   </div>
                 );
               })}
             </div>
 
-            {/* Legend */}
             <div className="sf-calendar-legend">
               <div className="sf-legend-item">
                 <div className="sf-legend-box sf-legend-box--default"></div>
@@ -396,7 +401,7 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
                   const slotClass = `
                     sf-time-slot
                     ${hasApproved ? 'sf-time-slot--booked' : ''}
-                    ${hasPending ? 'sf-time-slot--pending' : ''}
+                    ${hasPending && !hasApproved ? 'sf-time-slot--pending' : ''}
                     ${isSelected ? 'sf-time-slot--selected' : ''}
                   `;
 
@@ -407,7 +412,7 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
                       onClick={() => isClickable && handleTimeSlotClick(time)}
                     >
                       <div className="sf-time-slot-time">{format12h(time)}</div>
-                      {hasPending && (
+                      {hasPending && !hasApproved && (
                         <div className="sf-time-slot-badge">{pendingCount}</div>
                       )}
                     </div>
@@ -445,6 +450,26 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
           onConfirm={submitAppointment}
           onCancel={() => setShowConfirm(false)}
         />
+      )}
+
+      {/* Success Modal */}
+      {submitted && publicMode && (
+        <div className="mc-overlay" onClick={() => setSubmitted(false)}>
+          <div className="mc-modal" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center', maxWidth: '400px' }}>
+            <div className="mc-icon-wrap" style={{ background: 'var(--primary-green-light)', color: 'var(--primary-green)', margin: '0 auto 1.5rem' }}>
+              <CheckCircle2 size={32} />
+            </div>
+            <h2 className="mc-title" style={{ marginBottom: '0.5rem' }}>Appointment Submitted!</h2>
+            <p className="mc-message" style={{ marginBottom: '2rem' }}>
+              Your appointment request has been successfully received. Please expect a text message from the clinic for confirmation.
+            </p>
+            <div className="mc-actions" style={{ justifyContent: 'center' }}>
+              <button className="mc-btn mc-btn--confirm" onClick={() => setSubmitted(false)} style={{ width: '100%' }}>
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
