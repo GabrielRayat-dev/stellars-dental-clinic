@@ -67,6 +67,12 @@
   .sf-card {
     padding: 2rem 1.5rem;
   }
+  .sf-timeslots-column {
+    grid-column: 1 / -1;
+  }
+  .sf-time-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
@@ -226,7 +232,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.3rem;
-  flex: 1;
+  /* flex: 1; */
   margin-bottom: 1rem;
 }
 
@@ -408,7 +414,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.8rem;
-  flex: 1;
+  /* flex: 1; */
   margin-bottom: 1rem;
 }
 
