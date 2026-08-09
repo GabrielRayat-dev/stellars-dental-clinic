@@ -875,3 +875,208 @@
   font-size: 0.9rem;
   color: var(--text-dark);
 }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — Tablet (≤ 1024px)
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .lp-hero-new {
+    padding: 6rem 6% 4rem;
+    min-height: 75vh;
+  }
+
+  .lp-hero-new__title {
+    font-size: 3.5rem;
+  }
+
+  .lp-about {
+    gap: 3rem;
+    padding: 5rem 6%;
+  }
+
+  .lp-about__visual {
+    flex: 0 0 280px;
+  }
+
+  .lp-services,
+  .lp-dentists,
+  .lp-faqs,
+  .lp-how,
+  .lp-booking-section {
+    padding: 5rem 6%;
+  }
+
+  .lp-stats__item {
+    padding: 0 2rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — Phone (≤ 768px)
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* ── Hero ── */
+  .lp-hero-new {
+    padding: 5rem 5% 4rem;
+    min-height: 65vh;
+    align-items: flex-end;
+  }
+
+  .lp-hero-new__title {
+    font-size: 2.8rem;
+  }
+
+  .lp-hero-new__subtitle {
+    font-size: 1rem;
+  }
+
+  /* ── Stats ── */
+  .lp-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 2rem 5%;
+    gap: 0;
+  }
+
+  .lp-stats__item {
+    padding: 1.25rem 1rem;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .lp-stats__item:nth-child(odd) {
+    border-right: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .lp-stats__item:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
+
+  .lp-stats__value {
+    font-size: 1.8rem;
+  }
+
+  /* ── About ── */
+  .lp-about {
+    flex-direction: column;
+    gap: 2.5rem;
+    padding: 4rem 5%;
+  }
+
+  .lp-about__visual {
+    flex: none;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .lp-about__badge {
+    top: -10px;
+    right: -10px;
+  }
+
+  .lp-about__body {
+    max-width: 100%;
+  }
+
+  /* ── Section headers ── */
+  .lp-section-title {
+    font-size: 1.6rem;
+  }
+
+  .lp-section-sub {
+    font-size: 0.9rem;
+  }
+
+  .lp-section-header {
+    margin-bottom: 2rem;
+  }
+
+  /* ── Services ── */
+  .lp-services {
+    padding: 4rem 5%;
+  }
+
+  .lp-services__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-loading-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── How It Works ── */
+  .lp-how {
+    padding: 4rem 5%;
+  }
+
+  .lp-how__steps {
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .lp-how__step {
+    flex: none;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  /* Hide horizontal arrows, they make no sense vertically */
+  .lp-how__connector {
+    display: none;
+  }
+
+  /* ── Dentists ── */
+  .lp-dentists {
+    padding: 4rem 5%;
+  }
+
+  .lp-dentists__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* ── FAQs ── */
+  .lp-faqs {
+    padding: 4rem 5%;
+  }
+
+  /* ── Booking ── */
+  .lp-booking-section {
+    padding: 4rem 5%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — Small Phone (≤ 480px)
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .lp-hero-new__title {
+    font-size: 2.2rem;
+  }
+
+  .lp-hero-new__subtitle {
+    font-size: 0.9rem;
+  }
+
+  /* Stack subtitle br tags don't force awkward wraps */
+  .lp-hero-new__subtitle br {
+    display: none;
+  }
+
+  .lp-dentists__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-stats__value {
+    font-size: 1.6rem;
+  }
+
+  .lp-section-title {
+    font-size: 1.4rem;
+  }
+
+  .lp-booking-section .sf-card {
+    border-radius: 8px;
+  }
+}
