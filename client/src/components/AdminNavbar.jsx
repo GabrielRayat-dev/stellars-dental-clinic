@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { apiFetch } from '../api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -58,7 +59,7 @@ const AdminNavbar = () => {
     setUpdateError('');
     setUpdateLoading(true);
     try {
-      const res = await fetch('/api/auth/profile', {
+      const res = await apiFetch('/api/auth/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

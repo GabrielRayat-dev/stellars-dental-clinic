@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { apiFetch } from '../api';
 import { ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import ModalConfirmation from './ModalConfirmation';
 import { useAuth } from '../context/AuthContext';
@@ -110,7 +111,7 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
     const fetchData = async () => {
       try {
         // Fetch services
-        const servicesRes = await fetch('/api/services/public');
+        const servicesRes = await apiFetch('/api/services/public');
         const servicesJson = await servicesRes.json();
         if (servicesRes.ok && servicesJson.data) {
           setServices(servicesJson.data);
@@ -126,7 +127,7 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
           appointmentsHeaders = { Authorization: `Bearer ${token}` };
         }
         
-        const appointmentsRes = await fetch(appointmentsUrl, {
+        const appointmentsRes = await apiFetch(appointmentsUrl, {
           headers: appointmentsHeaders
         });
         const appointmentsJson = await appointmentsRes.json();
@@ -232,7 +233,7 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
       const headers = { 'Content-Type': 'application/json' };
       if (!publicMode && token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('/api/appointments', {
+      const res = await apiFetch('/api/appointments', {
         method: 'POST',
         headers,
         body: JSON.stringify(form)

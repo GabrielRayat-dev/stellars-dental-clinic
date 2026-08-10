@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import {
   UserCog,
@@ -48,9 +49,9 @@ const AdminDashboard = () => {
     setError('');
     try {
       const [statsRes, staffRes, logsRes] = await Promise.all([
-        fetch('/api/stats', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/admin/staff', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/audit-logs', { headers: { Authorization: `Bearer ${token}` } }),
+        apiFetch('/api/stats', { headers: { Authorization: `Bearer ${token}` } }),
+        apiFetch('/api/admin/staff', { headers: { Authorization: `Bearer ${token}` } }),
+        apiFetch('/api/audit-logs', { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (!statsRes.ok || !staffRes.ok || !logsRes.ok) throw new Error('Failed to load dashboard data');

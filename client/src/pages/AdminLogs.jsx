@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -28,7 +29,7 @@ const AdminLogs = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/audit-logs', {
+      const res = await apiFetch('/api/audit-logs', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();

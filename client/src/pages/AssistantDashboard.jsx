@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import {
   Calendar,
@@ -55,8 +56,8 @@ const AssistantDashboard = () => {
     setError('');
     try {
       const [appRes, logsRes] = await Promise.all([
-        fetch('/api/appointments', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/audit-logs', { headers: { Authorization: `Bearer ${token}` } }),
+        apiFetch('/api/appointments', { headers: { Authorization: `Bearer ${token}` } }),
+        apiFetch('/api/audit-logs', { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (!appRes.ok || !logsRes.ok) throw new Error('Failed to load dashboard data');

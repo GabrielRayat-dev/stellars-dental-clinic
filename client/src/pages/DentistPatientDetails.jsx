@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, Activity, Image as ImageIcon, Loader2, AlertCircle, Trash2, X
@@ -49,8 +50,8 @@ const DentistPatientDetails = () => {
   const fetchData = useCallback(async () => {
     try {
       const [patientRes, servicesRes] = await Promise.all([
-        fetch(`/api/patients/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/services', { headers: { Authorization: `Bearer ${token}` } })
+        apiFetch(`/api/patients/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
+        apiFetch('/api/services', { headers: { Authorization: `Bearer ${token}` } })
       ]);
 
       const patientJson = await patientRes.json();
@@ -118,7 +119,7 @@ const DentistPatientDetails = () => {
         : `/api/patients/${id}/diagnosis`;
       const method = editingDiagnosis ? 'PUT' : 'POST';
       
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(diagnosisForm)
@@ -147,7 +148,7 @@ const DentistPatientDetails = () => {
     formData.append('image', imageFile);
 
     try {
-      const res = await fetch(`/api/patients/${id}/diagnosis/${uploadTargetRecordId}/images`, {
+      const res = await apiFetch(`/api/patients/${id}/diagnosis/${uploadTargetRecordId}/images`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }, // fetch handles boundary for FormData
         body: formData
@@ -176,7 +177,7 @@ const DentistPatientDetails = () => {
         ? `/api/patients/${id}/diagnosis/${recordId}`
         : `/api/patients/${id}/images/${recordId}`;
 
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });

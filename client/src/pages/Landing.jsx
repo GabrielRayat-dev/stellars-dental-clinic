@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiFetch } from '../api';
 import {
   CalendarCheck,
   Stethoscope,
@@ -241,19 +242,19 @@ const Landing = () => {
   const [loadingFaq, setLoadingFaq] = useState(true);
 
   useEffect(() => {
-    fetch('/api/services/public')
+    apiFetch('/api/services/public')
       .then(r => r.json())
       .then(j => setServices(j.data || []))
       .catch(() => setServices([]))
       .finally(() => setLoadingSvc(false));
 
-    fetch('/api/public/dentists')
+    apiFetch('/api/public/dentists')
       .then(r => r.json())
       .then(j => setDentists(j.data || []))
       .catch(() => setDentists([]))
       .finally(() => setLoadingDen(false));
 
-    fetch('/api/public/faqs')
+    apiFetch('/api/public/faqs')
       .then(r => r.json())
       .then(j => setFaqs(j.data || []))
       .catch(() => setFaqs([]))

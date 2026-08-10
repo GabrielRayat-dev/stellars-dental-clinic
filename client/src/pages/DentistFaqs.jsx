@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { MessageCircleQuestion, Loader2, AlertCircle, Power, PowerOff } from 'lucide-react';
 import Header from '../components/Header';
@@ -41,7 +42,7 @@ const DentistFaqs = () => {
 
   const fetchFaqs = useCallback(async () => {
     try {
-      const res = await fetch('/api/public/faqs/all', {
+      const res = await apiFetch('/api/public/faqs/all', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const json = await res.json();
@@ -96,7 +97,7 @@ const DentistFaqs = () => {
       const url = editingFaq ? `/api/public/faqs/${editingFaq.id}` : '/api/public/faqs';
       const method = editingFaq ? 'PUT' : 'POST';
       
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(form)
@@ -122,7 +123,7 @@ const DentistFaqs = () => {
     setActionLoading(true);
     const { faq } = pendingAction;
     try {
-      const res = await fetch(`/api/public/faqs/${faq.id}`, {
+      const res = await apiFetch(`/api/public/faqs/${faq.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ question: faq.question, answer: faq.answer, is_active: !faq.is_active })
@@ -140,7 +141,7 @@ const DentistFaqs = () => {
     if (!faqToDelete) return;
     setDeleteLoading(true);
     try {
-      const res = await fetch(`/api/public/faqs/${faqToDelete.id}`, {
+      const res = await apiFetch(`/api/public/faqs/${faqToDelete.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });

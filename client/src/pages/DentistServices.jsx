@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { Activity, Loader2, AlertCircle, Power, PowerOff } from 'lucide-react';
 import Header from '../components/Header';
@@ -41,7 +42,7 @@ const DentistServices = () => {
 
   const fetchServices = useCallback(async () => {
     try {
-      const res = await fetch('/api/services', {
+      const res = await apiFetch('/api/services', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const json = await res.json();
@@ -95,7 +96,7 @@ const DentistServices = () => {
       const url = editingService ? `/api/services/${editingService.id}` : '/api/services';
       const method = editingService ? 'PUT' : 'POST';
       
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(form)
@@ -120,7 +121,7 @@ const DentistServices = () => {
     setActionLoading(true);
     const { service } = pendingAction;
     try {
-      const res = await fetch(`/api/services/${service.id}/toggle`, {
+      const res = await apiFetch(`/api/services/${service.id}/toggle`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ is_active: !service.is_active })
@@ -138,7 +139,7 @@ const DentistServices = () => {
     if (!serviceToDelete) return;
     setDeleteLoading(true);
     try {
-      const res = await fetch(`/api/services/${serviceToDelete.id}`, {
+      const res = await apiFetch(`/api/services/${serviceToDelete.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });

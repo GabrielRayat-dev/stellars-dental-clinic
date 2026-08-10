@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import FormInput from '../components/FormInput';
@@ -56,7 +57,7 @@ const Login = () => {
     setForgotLoading(true);
 
     try {
-      const res = await fetch('/api/auth/forgot-password', {
+      const res = await apiFetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: forgotEmail })
@@ -81,7 +82,7 @@ const Login = () => {
     setForgotLoading(true);
 
     try {
-      const res = await fetch('/api/auth/reset-password', {
+      const res = await apiFetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

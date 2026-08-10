@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -35,7 +36,7 @@ const AssistantSchedule = () => {
 
   const fetchAppointments = useCallback(async () => {
     try {
-      const res = await fetch('/api/appointments', {
+      const res = await apiFetch('/api/appointments', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const json = await res.json();
@@ -111,13 +112,13 @@ const AssistantSchedule = () => {
     const { type, app } = pendingAction;
     try {
       if (type === 'approve') {
-        const res = await fetch(`/api/appointments/${app.id}/approve`, {
+        const res = await apiFetch(`/api/appointments/${app.id}/approve`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
         });
         if (res.ok) fetchAppointments();
       } else {
-        const res = await fetch(`/api/appointments/${app.id}/reject`, {
+        const res = await apiFetch(`/api/appointments/${app.id}/reject`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ rejected_reason: 'Rejected by Assistant' })

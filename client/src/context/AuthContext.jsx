@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { apiFetch } from '../api';
 
 const AuthContext = createContext(null);
 
@@ -16,7 +17,7 @@ export const AuthProvider = ({ children }) => {
       setUser(JSON.parse(savedUser));
       
       // Fetch latest profile to ensure name updates are reflected
-      fetch('/api/auth/profile', {
+      apiFetch('/api/auth/profile', {
         headers: { Authorization: `Bearer ${savedToken}` }
       })
       .then(res => {
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await apiFetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +76,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // Call server logout (authenticated with token)
       if (token) {
-        await fetch('/api/auth/logout', {
+        await apiFetch('/api/auth/logout', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

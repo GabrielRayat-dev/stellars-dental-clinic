@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import {
   UserPlus,
@@ -58,7 +59,7 @@ const AdminUsers = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/admin/staff', {
+      const res = await apiFetch('/api/admin/staff', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
@@ -92,7 +93,7 @@ const AdminUsers = () => {
     e.preventDefault();
     setSubmitting(true); setFormError('');
     try {
-      const res = await fetch('/api/admin/staff', {
+      const res = await apiFetch('/api/admin/staff', {
         method: 'POST',
         headers: authHeader(),
         body: JSON.stringify(form),
@@ -126,7 +127,7 @@ const AdminUsers = () => {
     setSubmitting(true); setFormError('');
     const payload = { name: form.name, role: form.role, phone_number: form.phone_number, receive_emails: form.receive_emails, is_active: form.is_active };
     try {
-      const res = await fetch(`/api/admin/staff/${selectedId}`, {
+      const res = await apiFetch(`/api/admin/staff/${selectedId}`, {
         method: 'PUT',
         headers: authHeader(),
         body: JSON.stringify(payload),
@@ -143,7 +144,7 @@ const AdminUsers = () => {
   const submitDelete = async () => {
     setSubmitting(true); setFormError('');
     try {
-      const res = await fetch(`/api/admin/staff/${selectedId}`, {
+      const res = await apiFetch(`/api/admin/staff/${selectedId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

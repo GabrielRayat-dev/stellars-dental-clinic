@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, Loader2, AlertCircle } from 'lucide-react';
 import Header from '../components/Header';
@@ -42,7 +43,7 @@ const DentistPatients = () => {
 
   const fetchPatients = useCallback(async () => {
     try {
-      const res = await fetch('/api/patients', {
+      const res = await apiFetch('/api/patients', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const json = await res.json();
@@ -113,7 +114,7 @@ const DentistPatients = () => {
       const url = editingPatient ? `/api/patients/${editingPatient.id}` : '/api/patients';
       const method = editingPatient ? 'PUT' : 'POST';
       
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(form)
@@ -135,7 +136,7 @@ const DentistPatients = () => {
     if (!patientToDelete) return;
     setDeleteLoading(true);
     try {
-      const res = await fetch(`/api/patients/${patientToDelete.id}`, {
+      const res = await apiFetch(`/api/patients/${patientToDelete.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });

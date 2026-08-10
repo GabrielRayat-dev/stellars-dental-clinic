@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import {
   Calendar,
@@ -46,10 +47,10 @@ const DentistDashboard = () => {
     try {
       // Fetch Stats, Appointments, Audit logs, and Patients in parallel
       const [statsRes, appRes, logsRes, patientsRes] = await Promise.all([
-        fetch('/api/stats', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/appointments', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/audit-logs', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/patients', { headers: { Authorization: `Bearer ${token}` } })
+        apiFetch('/api/stats', { headers: { Authorization: `Bearer ${token}` } }),
+        apiFetch('/api/appointments', { headers: { Authorization: `Bearer ${token}` } }),
+        apiFetch('/api/audit-logs', { headers: { Authorization: `Bearer ${token}` } }),
+        apiFetch('/api/patients', { headers: { Authorization: `Bearer ${token}` } })
       ]);
 
       if (!statsRes.ok || !appRes.ok || !logsRes.ok || !patientsRes.ok) {
