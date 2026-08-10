@@ -48,7 +48,7 @@ const AdminUsers = () => {
   const [showDelete, setShowDelete] = useState(false);
 
   // Form state
-  const emptyForm = { name: '', email: '', password: '', role: 'assistant', phone_number: '', receive_emails: false, status: true };
+  const emptyForm = { name: '', email: '', password: '', role: 'assistant', phone_number: '', receive_emails: false, is_active: true };
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
@@ -116,7 +116,7 @@ const AdminUsers = () => {
       role: selectedUser.role || 'assistant',
       phone_number: selectedUser.phone_number || '',
       receive_emails: selectedUser.receive_emails || false,
-      status: selectedUser.status ?? true,
+      is_active: selectedUser.is_active ?? true,
     });
     setFormError('');
     setShowEdit(true);
@@ -124,7 +124,7 @@ const AdminUsers = () => {
   const submitEdit = async (e) => {
     e.preventDefault();
     setSubmitting(true); setFormError('');
-    const payload = { name: form.name, role: form.role, phone_number: form.phone_number, receive_emails: form.receive_emails, status: form.status };
+    const payload = { name: form.name, role: form.role, phone_number: form.phone_number, receive_emails: form.receive_emails, is_active: form.is_active };
     try {
       const res = await fetch(`/api/admin/staff/${selectedId}`, {
         method: 'PUT',
@@ -270,7 +270,7 @@ const AdminUsers = () => {
                 <span className="au-toggle__label">Receive email notifications</span>
               </label>
               <label className="au-toggle">
-                <input type="checkbox" name="status" checked={form.status} onChange={handleField} />
+                <input type="checkbox" name="is_active" checked={form.is_active} onChange={handleField} />
                 <span className="au-toggle__track" />
                 <span className="au-toggle__label">Active account</span>
               </label>
@@ -311,7 +311,7 @@ const AdminUsers = () => {
                 <span className="au-toggle__label">Receive email notifications</span>
               </label>
               <label className="au-toggle">
-                <input type="checkbox" name="status" checked={form.status} onChange={handleField} />
+                <input type="checkbox" name="is_active" checked={form.is_active} onChange={handleField} disabled={selectedUser.id === currentUser?.id} />
                 <span className="au-toggle__track" />
                 <span className="au-toggle__label">Active account</span>
               </label>
