@@ -1,6 +1,34 @@
 const appointmentModel = require('../models/appointment.model');
 const auditModel = require('../models/audit.model');
 
+// Clinic time slots — must match the client's available slots
+const VALID_TIME_SLOTS = [
+  '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
+  '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM',
+];
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+const isPastDate = (dateStr) => {
+  const date = new Date(`${dateStr}T00:00:00Z`);
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  return date < today;
+};
+
+// Get public availability — approved dates/times only, no patient data
+const getPublicAvailability = async (req, res) => {
+  try {
+    const data = await appointmentModel.getPublicAvailability();
+    res.status(200).json({
+      message: 'Availability retrieved successfully',
+      data,
+    });
+  } catch (error) {
+    console.error('[GetPublicAvailability]', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 // Get all appointments
 const getAllAppointments = async (req, res) => {
   try {
@@ -42,9 +70,27 @@ const createAppointment = async (req, res) => {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
+    const name = String(patient_name).trim();
+    if (name.length < 1 || name.length > 100) {
+      return res.status(400).json({ message: 'Patient name must be between 1 and 100 characters' });
+    }
+
+    const phoneDigits = String(phone_number).replace(/\D/g, '');
+    if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+      return res.status(400).json({ message: 'Please provide a valid phone number' });
+    }
+
+    if (!DATE_REGEX.test(preferred_date) || isPastDate(preferred_date)) {
+      return res.status(400).json({ message: 'Please select a valid future date' });
+    }
+
+    if (!VALID_TIME_SLOTS.includes(preferred_time)) {
+      return res.status(400).json({ message: 'Please select a valid time slot' });
+    }
+
     const data = await appointmentModel.createAppointment({
-      patient_name,
-      phone_number,
+      patient_name: name,
+      phone_number: phoneDigits,
       service_id,
       preferred_date,
       preferred_time,
@@ -55,6 +101,10 @@ const createAppointment = async (req, res) => {
       data,
     });
   } catch (error) {
+    console.error('[CreateAppointment]', error);
+    if (error && error.message && error.message.includes('idx_appointments_approved_slot')) {
+      return res.status(400).json({ message: 'This time slot is no longer available' });
+    }
     res.status(400).json({ message: error.message });
   }
 };
@@ -175,6 +225,7 @@ const checkAppointmentStatus = async (req, res) => {
       data,
     });
   } catch (error) {
+    console.error('[CheckAppointmentStatus]', error);
     res.status(404).json({ message: 'No appointment found for this name and phone number' });
   }
 };
@@ -182,6 +233,7 @@ const checkAppointmentStatus = async (req, res) => {
 module.exports = {
   getAllAppointments,
   getAppointmentById,
+  getPublicAvailability,
   createAppointment,
   approveAppointment,
   rejectAppointment,

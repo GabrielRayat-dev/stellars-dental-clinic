@@ -29,6 +29,17 @@ const getAppointmentById = async (id) => {
   return data;
 };
 
+// Public availability — approved dates/times only, no patient data
+const getPublicAvailability = async () => {
+  const { data, error } = await supabaseAdmin
+    .from('appointments')
+    .select('preferred_date, preferred_time, status')
+    .eq('status', 'approved');
+
+  if (error) throw error;
+  return data;
+};
+
 // Create appointment (by assistant or public)
 const createAppointment = async (appointmentData) => {
   // Duplicate guard — check if phone number has active request
@@ -41,6 +52,20 @@ const createAppointment = async (appointmentData) => {
 
   if (existing) {
     throw new Error('This phone number already has an active appointment request');
+  }
+
+  // Slot guard — reject if this time slot already has an approved appointment
+  const { data: slotTaken, error: slotError } = await supabase
+    .from('appointments')
+    .select('id')
+    .eq('preferred_date', appointmentData.preferred_date)
+    .eq('preferred_time', appointmentData.preferred_time)
+    .eq('status', 'approved')
+    .maybeSingle();
+
+  if (slotError) throw slotError;
+  if (slotTaken) {
+    throw new Error('This time slot is no longer available');
   }
 
   const { data, error } = await supabase
@@ -122,6 +147,7 @@ const checkAppointmentStatus = async (patientName, phoneNumber) => {
 module.exports = {
   getAllAppointments,
   getAppointmentById,
+  getPublicAvailability,
   createAppointment,
   updateAppointmentStatus,
   getRejectedAppointments,

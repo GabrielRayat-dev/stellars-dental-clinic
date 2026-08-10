@@ -1,9 +1,13 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
+
+// Trust the first proxy hop (Render) so rate limiters key on real client IPs
+app.set('trust proxy', 1);
 
 // Rate limiters
 const authLimiter = rateLimit({
@@ -13,6 +17,7 @@ const authLimiter = rateLimit({
 });
 
 // Middlewares
+app.use(helmet());
 app.use(cors({
   origin: process.env.CLIENT_URL === '*' ? '*' : (process.env.CLIENT_URL || 'http://localhost:5173'),
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
@@ -23,7 +28,7 @@ app.use((req, res, next) => {
   if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
     return next();
   }
-  express.json()(req, res, next);
+  express.json({ limit: '1mb' })(req, res, next);
 });
 
 // Routes

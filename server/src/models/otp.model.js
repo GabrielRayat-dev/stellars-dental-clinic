@@ -1,7 +1,14 @@
+const crypto = require('crypto');
 const { supabaseAdmin } = require('../config/supabase');
 
+const MAX_ATTEMPTS = 5;
+
 const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
+};
+
+const hashOTP = (otp) => {
+  return crypto.createHash('sha256').update(otp).digest('hex');
 };
 
 const createOTP = async (email) => {
@@ -17,25 +24,47 @@ const createOTP = async (email) => {
 
   const { error } = await supabaseAdmin
     .from('otp_requests')
-    .insert({ email, otp, expires_at });
+    .insert({ email, otp: hashOTP(otp), expires_at });
 
   if (error) throw error;
   return otp;
 };
 
 const verifyOTP = async (email, otp) => {
+  const hashed = hashOTP(otp);
+
   const { data, error } = await supabaseAdmin
     .from('otp_requests')
     .select('*')
     .eq('email', email)
-    .eq('otp', otp)
+    .eq('otp', hashed)
     .eq('used', false)
     .gt('expires_at', new Date().toISOString())
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
 
-  if (error || !data) return false;
+  if (error || !data) {
+    // Record a failed attempt against the most recent unused OTP for this email
+    const { data: latest } = await supabaseAdmin
+      .from('otp_requests')
+      .select('id, attempts')
+      .eq('email', email)
+      .eq('used', false)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (latest) {
+      const newAttempts = (latest.attempts || 0) + 1;
+      await supabaseAdmin
+        .from('otp_requests')
+        .update({ attempts: newAttempts, used: newAttempts >= MAX_ATTEMPTS })
+        .eq('id', latest.id);
+    }
+
+    return false;
+  }
 
   // Mark as used
   await supabaseAdmin

@@ -12,6 +12,23 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
+    // Check account status BEFORE verifying the password, so disabled accounts
+    // don't participate in password attempts
+    const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const authUser = users.find(u => u.email === email);
+
+    if (authUser) {
+      const { data: activeProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('id, is_active')
+        .eq('user_id', authUser.id)
+        .maybeSingle();
+
+      if (activeProfile && !activeProfile.is_active) {
+        return res.status(403).json({ message: 'Account is disabled. Contact your administrator.' });
+      }
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -54,6 +71,7 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error('[Login]', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -213,27 +231,29 @@ const forgotPassword = async (req, res) => {
       return res.status(400).json({ message: 'Email is required' });
     }
 
-    // Check if email exists in profiles — use supabaseAdmin to bypass RLS
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('id, name')
-      .eq('user_id', 
-        (await supabaseAdmin.auth.admin.listUsers()).data.users
-          .find(u => u.email === email)?.id
-      )
-      .single();
+    const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const authUser = users.find(u => u.email === email);
 
-    // Always return same response regardless of whether email exists
+    // Always return the same response whether or not the email exists
     // (email enumeration protection)
-    if (profile) {
-      const otp = await otpModel.createOTP(email);
-      await sendOTPEmail(email, profile.name, otp);
+    if (authUser) {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('id, name')
+        .eq('user_id', authUser.id)
+        .maybeSingle();
+
+      if (profile) {
+        const otp = await otpModel.createOTP(email);
+        await sendOTPEmail(email, profile.name, otp);
+      }
     }
 
     res.status(200).json({
       message: 'If this email exists, an OTP has been sent',
     });
   } catch (error) {
+    console.error('[ForgotPassword]', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -257,12 +277,12 @@ const resetPassword = async (req, res) => {
     }
 
     // Find user by email
-    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    if (listError) throw listError;
-
+    const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     const user = users.find(u => u.email === email);
+
+    // Same response for unknown users to avoid enumeration
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(401).json({ message: 'Invalid or expired OTP' });
     }
 
     // Update password
@@ -276,6 +296,7 @@ const resetPassword = async (req, res) => {
 
     res.status(200).json({ message: 'Password reset successfully' });
   } catch (error) {
+    console.error('[ResetPassword]', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
