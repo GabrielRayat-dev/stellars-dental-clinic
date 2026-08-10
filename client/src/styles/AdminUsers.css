@@ -117,6 +117,8 @@
 
 .au-badge--inactive { color: var(--error-red); }
 .au-badge--inactive .au-badge__dot { background-color: var(--error-red); }
+.au-badge--session { color: var(--text-muted); }
+.au-badge--session .au-badge__dot { background-color: var(--text-muted); }
 
 /* ── States ──────────────────────────────────── */
 .au-state {
