@@ -37,6 +37,9 @@ Form state:
   `is_active: selectedUser.is_active ?? true`.
 - `submitEdit` payload: replace `status: form.status` with
   `is_active: form.is_active`.
+- In both the Add and Edit modals, the "Active account" checkbox input's
+  `name` attribute changes from `status` to `is_active` so it binds to the
+  new form field.
 
 The Add form already submits the full `form` object, so `is_active` flows
 through `createStaff` unchanged.
