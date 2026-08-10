@@ -197,9 +197,9 @@ const AdminUsers = () => {
             <span>{error}</span>
           </div>
         ) : (
-          <Table headers={['Name', 'Role', 'Phone Number', 'Email', 'Receive Emails', 'Status']}>
+          <Table headers={['Name', 'Role', 'Phone Number', 'Email', 'Receive Emails', 'Session', 'Status']}>
             {pageUsers.length === 0 ? (
-              <tr><td colSpan={6} className="st-table__empty">No users found.</td></tr>
+              <tr><td colSpan={7} className="st-table__empty">No users found.</td></tr>
             ) : (
               pageUsers.map((u) => (
                 <tr
@@ -215,9 +215,15 @@ const AdminUsers = () => {
                     <span className={`au-checkbox-dot ${u.receive_emails ? 'au-checkbox-dot--on' : ''}`} />
                   </td>
                   <td>
-                    <span className={`au-badge ${u.status ? 'au-badge--active' : 'au-badge--inactive'}`}>
+                    <span className="au-badge au-badge--session">
                       <span className="au-badge__dot" />
-                      {u.status ? 'active' : 'not active'}
+                      {u.status === 'logged_in' ? 'Logged in' : 'Logged out'}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`au-badge ${u.is_active ? 'au-badge--active' : 'au-badge--inactive'}`}>
+                      <span className="au-badge__dot" />
+                      {u.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                 </tr>
