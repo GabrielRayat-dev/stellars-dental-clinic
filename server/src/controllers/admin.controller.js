@@ -72,6 +72,11 @@ const updateStaff = async (req, res) => {
     const { id } = req.params;
     const { name, role, is_active, specialization, phone_number } = req.body;
 
+    // Prevent admin from deactivating themselves
+    if (id === req.profile.id && is_active === false) {
+      return res.status(400).json({ message: 'Admin cannot deactivate itself' });
+    }
+
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: 'No data provided for update' });
     }
