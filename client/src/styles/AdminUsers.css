@@ -305,6 +305,14 @@
   transform: translateX(16px);
 }
 
+.au-toggle input:disabled + .au-toggle__track {
+  opacity: 0.45;
+}
+
+.au-toggle:has(input:disabled) {
+  cursor: not-allowed;
+}
+
 .au-form__error {
   display: flex;
   align-items: center;
