@@ -5,42 +5,33 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-      
-      // Fetch latest profile to ensure name updates are reflected
-      apiFetch('/api/auth/profile', {
-        headers: { Authorization: `Bearer ${savedToken}` }
+    let cancelled = false;
+
+    // Session lives in an httpOnly cookie (unreadable by JS), so the only way
+    // to know if we're logged in is to ask the server.
+    apiFetch('/api/auth/profile')
+      .then(async (res) => {
+        if (res.status === 401) return null;
+        if (!res.ok) throw new Error('Failed to fetch profile');
+        const data = await res.json();
+        return data?.data || null;
       })
-      .then(res => {
-        if (!res.ok) {
-          if (res.status === 401) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            setToken(null);
-            setUser(null);
-          }
-          throw new Error('Failed to fetch profile');
-        }
-        return res.json();
+      .then((profile) => {
+        if (!cancelled) setUser(profile);
       })
-      .then(data => {
-        if (data && data.data) {
-          setUser(data.data);
-          localStorage.setItem('user', JSON.stringify(data.data));
-        }
+      .catch(() => {
+        if (!cancelled) setUser(null);
       })
-      .catch(err => console.error('Failed to refresh profile', err));
-    }
-    setLoading(false);
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const login = async (email, password) => {
@@ -59,11 +50,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Save credentials & profile
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.profile));
-      
-      setToken(data.token);
       setUser(data.profile);
 
       return { success: true, profile: data.profile };
@@ -74,33 +60,20 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Call server logout (authenticated with token)
-      if (token) {
-        await apiFetch('/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-      }
+      await apiFetch('/api/auth/logout', { method: 'POST' });
     } catch (err) {
       console.error('Logout error on server:', err);
     } finally {
-      // Always clear local session
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setToken(null);
       setUser(null);
     }
   };
 
   const value = {
     user,
-    token,
     loading,
     login,
     logout,
-    isAuthenticated: !!token,
+    isAuthenticated: !!user,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

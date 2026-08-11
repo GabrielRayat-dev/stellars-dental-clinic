@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, Loader2, AlertCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import { TableWrap, Table } from '../components/Table';
 import SearchBar from '../components/SearchBar';
@@ -14,7 +13,6 @@ const ROWS_PER_PAGE = 10;
 
 const AssistantLogs = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
 
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,9 +26,7 @@ const AssistantLogs = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await apiFetch('/api/audit-logs', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await apiFetch('/api/audit-logs');
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || 'Failed to load logs');
       setLogs(json.data || []);
@@ -39,7 +35,7 @@ const AssistantLogs = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     fetchLogs();

@@ -9,12 +9,10 @@ import AdminPagination from '../components/AdminPagination';
 import Modal from '../components/Modal';
 import ModalConfirmation from '../components/ModalConfirmation';
 import ButtonWithIcons from '../components/ButtonWithIcons';
-import { useAuth } from '../context/AuthContext';
 import '../styles/DentistSchedule.css'; // Reusing layout styles
 
 const DentistPatients = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
 
   // Data
   const [patients, setPatients] = useState([]);
@@ -43,16 +41,14 @@ const DentistPatients = () => {
 
   const fetchPatients = useCallback(async () => {
     try {
-      const res = await apiFetch('/api/patients', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/api/patients');
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || 'Failed to fetch patients');
       setPatients(json.data || []);
     } catch (err) {
       setError(err.message);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -116,7 +112,7 @@ const DentistPatients = () => {
       
       const res = await apiFetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
       });
       const json = await res.json();
@@ -137,8 +133,7 @@ const DentistPatients = () => {
     setDeleteLoading(true);
     try {
       const res = await apiFetch(`/api/patients/${patientToDelete.id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        method: 'DELETE'
       });
       if (res.ok) await fetchPatients();
     } catch (err) {

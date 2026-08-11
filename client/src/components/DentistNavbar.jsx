@@ -31,7 +31,7 @@ const dentistNavLinks = [
 const DentistNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, token, logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -71,8 +71,7 @@ const DentistNavbar = () => {
       const res = await apiFetch('/api/auth/profile', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ name: updateName, phone_number: updatePhone })
       });

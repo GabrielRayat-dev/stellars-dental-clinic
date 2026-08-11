@@ -22,7 +22,7 @@ import '../styles/Dashboard.css';
 import '../styles/DentistDashboard.css';
 
 const DentistDashboard = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   // Data States
@@ -47,10 +47,10 @@ const DentistDashboard = () => {
     try {
       // Fetch Stats, Appointments, Audit logs, and Patients in parallel
       const [statsRes, appRes, logsRes, patientsRes] = await Promise.all([
-        apiFetch('/api/stats', { headers: { Authorization: `Bearer ${token}` } }),
-        apiFetch('/api/appointments', { headers: { Authorization: `Bearer ${token}` } }),
-        apiFetch('/api/audit-logs', { headers: { Authorization: `Bearer ${token}` } }),
-        apiFetch('/api/patients', { headers: { Authorization: `Bearer ${token}` } })
+        apiFetch('/api/stats'),
+        apiFetch('/api/appointments'),
+        apiFetch('/api/audit-logs'),
+        apiFetch('/api/patients')
       ]);
 
       if (!statsRes.ok || !appRes.ok || !logsRes.ok || !patientsRes.ok) {
@@ -71,13 +71,13 @@ const DentistDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
-    if (token) {
+    if (user) {
       fetchDashboardData();
     }
-  }, [token, fetchDashboardData]);
+  }, [user, fetchDashboardData]);
 
   // Reset pages on new fetch
   useEffect(() => {

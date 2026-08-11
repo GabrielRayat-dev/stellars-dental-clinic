@@ -82,7 +82,7 @@ const analyzeDateStatus = (date, appointments) => {
 };
 
 const ScheduleForm = ({ onSuccess, publicMode = false }) => {
-  const { token } = useAuth();
+  const { user } = useAuth();
   const [services, setServices] = useState([]);
   const [appointments, setAppointments] = useState([]);
 
@@ -119,17 +119,13 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
 
         // Fetch appointments to show availability
         let appointmentsUrl = '/api/appointments/public/availability';
-        let appointmentsHeaders = {};
         
         // If authenticated (protected mode), use the authenticated endpoint
-        if (token) {
+        if (user) {
           appointmentsUrl = '/api/appointments';
-          appointmentsHeaders = { Authorization: `Bearer ${token}` };
         }
         
-        const appointmentsRes = await apiFetch(appointmentsUrl, {
-          headers: appointmentsHeaders
-        });
+        const appointmentsRes = await apiFetch(appointmentsUrl);
         const appointmentsJson = await appointmentsRes.json();
         if (appointmentsRes.ok && appointmentsJson.data) {
           setAppointments(appointmentsJson.data);
@@ -139,7 +135,7 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
       }
     };
     fetchData();
-  }, [token, publicMode]);
+  }, [user, publicMode]);
 
   // Get days in month
   const getDaysInMonth = (date) => {
@@ -231,7 +227,6 @@ const ScheduleForm = ({ onSuccess, publicMode = false }) => {
 
     try {
       const headers = { 'Content-Type': 'application/json' };
-      if (!publicMode && token) headers['Authorization'] = `Bearer ${token}`;
 
       const res = await apiFetch('/api/appointments', {
         method: 'POST',

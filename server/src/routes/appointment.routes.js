@@ -10,7 +10,7 @@ const { appointmentSchemas } = require('../validation/schemas');
 const bookingLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  skip: (req) => !!req.headers.authorization,
+  skip: (req) => !!(req.headers.authorization || (req.cookies && req.cookies.token)),
   message: { message: 'Too many booking attempts. Try again later.' },
 });
 

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '../api';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Loader2, AlertCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import ScheduleForm from '../components/ScheduleForm';
 import AdminPagination from '../components/AdminPagination';
@@ -14,7 +13,6 @@ import '../styles/DentistSchedule.css';
 
 const DentistSchedule = () => {
   const navigate = useNavigate();
-  const { token, user } = useAuth();
 
   const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved' | 'schedule'
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,16 +35,14 @@ const DentistSchedule = () => {
 
   const fetchAppointments = useCallback(async () => {
     try {
-      const res = await apiFetch('/api/appointments', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/api/appointments');
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || 'Failed to fetch appointments');
       setAppointments(json.data || []);
     } catch (err) {
       setError(err.message);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -115,13 +111,13 @@ const DentistSchedule = () => {
       if (type === 'approve') {
         const res = await apiFetch(`/api/appointments/${app.id}/approve`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+          headers: { 'Content-Type': 'application/json' }
         });
         if (res.ok) fetchAppointments();
       } else {
         const res = await apiFetch(`/api/appointments/${app.id}/reject`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ rejected_reason: 'Rejected by Dentist' })
         });
         if (res.ok) fetchAppointments();

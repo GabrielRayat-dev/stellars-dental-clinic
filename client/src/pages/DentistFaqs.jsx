@@ -9,12 +9,10 @@ import AdminPagination from '../components/AdminPagination';
 import Modal from '../components/Modal';
 import ModalConfirmation from '../components/ModalConfirmation';
 import ButtonWithIcons from '../components/ButtonWithIcons';
-import { useAuth } from '../context/AuthContext';
 import '../styles/DentistSchedule.css'; // Reusing layout styles
 
 const DentistFaqs = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
 
   // Data
   const [faqs, setFaqs] = useState([]);
@@ -42,16 +40,14 @@ const DentistFaqs = () => {
 
   const fetchFaqs = useCallback(async () => {
     try {
-      const res = await apiFetch('/api/public/faqs/all', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/api/public/faqs/all');
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || 'Failed to fetch FAQs');
       setFaqs(json.data || []);
     } catch (err) {
       setError(err.message);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -99,7 +95,7 @@ const DentistFaqs = () => {
       
       const res = await apiFetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
       });
       const json = await res.json();
@@ -125,7 +121,7 @@ const DentistFaqs = () => {
     try {
       const res = await apiFetch(`/api/public/faqs/${faq.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: faq.question, answer: faq.answer, is_active: !faq.is_active })
       });
       if (res.ok) await fetchFaqs();
@@ -142,8 +138,7 @@ const DentistFaqs = () => {
     setDeleteLoading(true);
     try {
       const res = await apiFetch(`/api/public/faqs/${faqToDelete.id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        method: 'DELETE'
       });
       if (res.ok) {
         await fetchFaqs();

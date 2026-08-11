@@ -33,7 +33,7 @@ const Field = ({ label, required, children }) => (
 /* ─── Main Component ─────────────────────────── */
 const AdminUsers = () => {
   const navigate = useNavigate();
-  const { token, user: currentUser } = useAuth();
+  const { user: currentUser } = useAuth();
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,9 +59,7 @@ const AdminUsers = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await apiFetch('/api/admin/staff', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await apiFetch('/api/admin/staff');
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || 'Failed to load users');
       setUsers(json.data || []);
@@ -70,7 +68,7 @@ const AdminUsers = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
@@ -80,7 +78,7 @@ const AdminUsers = () => {
   const selectedUser = users.find((u) => u.id === selectedId) || null;
 
   /* ── Helpers ─────────────────────────────── */
-  const authHeader = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${token}` });
+  const authHeader = () => ({ 'Content-Type': 'application/json' });
 
   const handleField = (e) => {
     const { name, value, type, checked } = e.target;
@@ -145,8 +143,7 @@ const AdminUsers = () => {
     setSubmitting(true); setFormError('');
     try {
       const res = await apiFetch(`/api/admin/staff/${selectedId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        method: 'DELETE'
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || 'Failed to delete user');

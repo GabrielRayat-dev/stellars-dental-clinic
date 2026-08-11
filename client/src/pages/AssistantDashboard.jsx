@@ -38,7 +38,7 @@ const formatTimeForDisplay = (timeStr) => {
 };
 
 const AssistantDashboard = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   // Data States
@@ -56,8 +56,8 @@ const AssistantDashboard = () => {
     setError('');
     try {
       const [appRes, logsRes] = await Promise.all([
-        apiFetch('/api/appointments', { headers: { Authorization: `Bearer ${token}` } }),
-        apiFetch('/api/audit-logs', { headers: { Authorization: `Bearer ${token}` } }),
+        apiFetch('/api/appointments'),
+        apiFetch('/api/audit-logs'),
       ]);
 
       if (!appRes.ok || !logsRes.ok) throw new Error('Failed to load dashboard data');
@@ -72,11 +72,11 @@ const AssistantDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
-    if (token) fetchDashboardData();
-  }, [token, fetchDashboardData]);
+    if (user) fetchDashboardData();
+  }, [user, fetchDashboardData]);
 
   useEffect(() => {
     setAppointmentsPage(1);

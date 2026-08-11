@@ -61,9 +61,20 @@ const login = async (req, res) => {
       action: 'login',
     });
 
+    // Session cookie — httpOnly so it's unreadable by client-side JS (XSS-safe).
+    // SameSite=Lax works because the client is served same-origin via the Vercel
+    // proxy in production and the Vite proxy in development.
+    const cookieMaxAge = (data.session.expires_in || 3600) * 1000;
+    res.cookie('token', data.session.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: cookieMaxAge,
+      path: '/',
+    });
+
     res.status(200).json({
       message: 'Login successful',
-      token: data.session.access_token,
       must_change_password: profile.must_change_password,
       profile: {
         ...profile,
@@ -161,6 +172,13 @@ const logout = async (req, res) => {
       actorName: req.profile.name,
       actorRole: req.profile.role,
       action: 'logout',
+    });
+
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
     });
 
     res.status(200).json({ message: 'Logged out successfully' });

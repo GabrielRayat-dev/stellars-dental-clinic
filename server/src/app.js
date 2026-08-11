@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
@@ -18,10 +19,12 @@ const authLimiter = rateLimit({
 
 // Middlewares
 app.use(helmet());
+app.use(cookieParser());
 app.use(cors({
   origin: process.env.CLIENT_URL === '*' ? '*' : (process.env.CLIENT_URL || 'http://localhost:5173'),
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
 // app.use(express.json());
 app.use((req, res, next) => {

@@ -30,7 +30,7 @@ const ROLE_BADGE_STYLE = {
 };
 
 const AdminDashboard = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   // Data
@@ -49,9 +49,9 @@ const AdminDashboard = () => {
     setError('');
     try {
       const [statsRes, staffRes, logsRes] = await Promise.all([
-        apiFetch('/api/stats', { headers: { Authorization: `Bearer ${token}` } }),
-        apiFetch('/api/admin/staff', { headers: { Authorization: `Bearer ${token}` } }),
-        apiFetch('/api/audit-logs', { headers: { Authorization: `Bearer ${token}` } }),
+        apiFetch('/api/stats'),
+        apiFetch('/api/admin/staff'),
+        apiFetch('/api/audit-logs'),
       ]);
 
       if (!statsRes.ok || !staffRes.ok || !logsRes.ok) throw new Error('Failed to load dashboard data');
@@ -68,11 +68,11 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
-    if (token) fetchDashboardData();
-  }, [token, fetchDashboardData]);
+    if (user) fetchDashboardData();
+  }, [user, fetchDashboardData]);
 
   useEffect(() => {
     setStaffPage(1);

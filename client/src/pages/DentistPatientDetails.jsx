@@ -9,14 +9,12 @@ import ButtonWithIcons from '../components/ButtonWithIcons';
 import { TableWrap, Table } from '../components/Table';
 import Modal from '../components/Modal';
 import ModalConfirmation from '../components/ModalConfirmation';
-import { useAuth } from '../context/AuthContext';
 import '../styles/DentistSchedule.css';
 import '../styles/DentistPatientDetails.css';
 
 const DentistPatientDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { token } = useAuth();
 
   const [patient, setPatient] = useState(null);
   const [services, setServices] = useState([]);
@@ -50,8 +48,8 @@ const DentistPatientDetails = () => {
   const fetchData = useCallback(async () => {
     try {
       const [patientRes, servicesRes] = await Promise.all([
-        apiFetch(`/api/patients/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
-        apiFetch('/api/services', { headers: { Authorization: `Bearer ${token}` } })
+        apiFetch(`/api/patients/${id}`),
+        apiFetch('/api/services')
       ]);
 
       const patientJson = await patientRes.json();
@@ -66,7 +64,7 @@ const DentistPatientDetails = () => {
     } finally {
       setLoading(false);
     }
-  }, [id, token]);
+  }, [id]);
 
   useEffect(() => {
     fetchData();
@@ -121,7 +119,7 @@ const DentistPatientDetails = () => {
       
       const res = await apiFetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(diagnosisForm)
       });
       const json = await res.json();
@@ -150,7 +148,6 @@ const DentistPatientDetails = () => {
     try {
       const res = await apiFetch(`/api/patients/${id}/diagnosis/${uploadTargetRecordId}/images`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }, // fetch handles boundary for FormData
         body: formData
       });
       const json = await res.json();
@@ -178,8 +175,7 @@ const DentistPatientDetails = () => {
         : `/api/patients/${id}/images/${recordId}`;
 
       const res = await apiFetch(url, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        method: 'DELETE'
       });
       if (res.ok) await fetchData();
     } catch (err) {
