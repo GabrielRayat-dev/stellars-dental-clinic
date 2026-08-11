@@ -22,6 +22,27 @@ const ROWS_PER_PAGE = 8;
 
 const ROLE_LABELS = { admin: 'Admin', dentist: 'Dentist', assistant: 'Assistant' };
 
+const FIELD_LABELS = {
+  email: 'Email',
+  password: 'Password',
+  name: 'Name',
+  role: 'Role',
+  phone_number: 'Phone Number',
+  specialization: 'Specialization',
+  receive_emails: 'Receive Emails',
+  is_active: 'Active',
+};
+
+const formatServerError = (json, fallback) => {
+  const errors = json?.errors?.fieldErrors || {};
+  const fields = Object.keys(errors);
+  if (!fields.length) return json?.message || fallback;
+  const details = fields
+    .map((f) => `${FIELD_LABELS[f] || f}: ${Array.isArray(errors[f]) ? errors[f].join(', ') : errors[f]}`)
+    .join(' • ');
+  return `${json?.message || 'Invalid request data'} — ${details}`;
+};
+
 /* ─── Field ──────────────────────────────────── */
 const Field = ({ label, required, children }) => (
   <div className="au-field">
@@ -97,7 +118,7 @@ const AdminUsers = () => {
         body: JSON.stringify(form),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.message || 'Failed to create user');
+      if (!res.ok) throw new Error(formatServerError(json, 'Failed to create user'));
       setShowAdd(false);
       setSelectedId(null);
       await fetchUsers();
@@ -131,7 +152,7 @@ const AdminUsers = () => {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.message || 'Failed to update user');
+      if (!res.ok) throw new Error(formatServerError(json, 'Failed to update user'));
       setShowEdit(false);
       await fetchUsers();
     } catch (err) { setFormError(err.message); }
