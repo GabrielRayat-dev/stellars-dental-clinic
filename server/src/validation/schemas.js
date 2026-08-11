@@ -4,6 +4,7 @@ const { z } = require('zod');
 const email = z.email().trim().toLowerCase().max(254);
 const name = z.string().trim().min(1).max(100);
 const phone = z.string().trim().min(7).max(20);
+const phoneOpt = z.preprocess((v) => (v === '' ? undefined : v), phone.optional());
 const passwordMin8 = z.string().min(8).max(128);
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const otpCode = z.string().regex(/^\d{6}$/);
@@ -39,7 +40,7 @@ const authSchemas = {
     body: z.object({
       new_email: email.optional(),
       name: name.optional(),
-      phone_number: phone.optional(),
+      phone_number: phoneOpt,
       specialization: text(1, 200).optional(),
     }),
   },
@@ -84,7 +85,7 @@ const adminSchemas = {
       name,
       role: z.enum(['dentist', 'assistant']),
       specialization: text(1, 200).optional(),
-      phone_number: phone.optional(),
+      phone_number: phoneOpt,
       receive_emails: z.boolean().optional(),
       is_active: z.boolean().optional(),
     }),
@@ -94,7 +95,7 @@ const adminSchemas = {
       name: name.optional(),
       role: z.enum(['dentist', 'assistant']).optional(),
       specialization: text(1, 200).optional(),
-      phone_number: phone.optional(),
+      phone_number: phoneOpt,
       receive_emails: z.boolean().optional(),
       is_active: z.boolean().optional(),
     }),
@@ -149,8 +150,8 @@ const patientSchemas = {
       sex: text(1, 20).optional(),
       civil_status: text(1, 30).optional(),
       address: text(1, 255).optional(),
-      phone_number: phone.optional(),
-      emergency_contact: phone.optional(),
+      phone_number: phoneOpt,
+      emergency_contact: phoneOpt,
       blood_type: text(1, 10).optional(),
     }),
   },
