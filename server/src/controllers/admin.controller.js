@@ -62,7 +62,8 @@ const createStaff = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('createStaff failed:', error);
+    res.status(500).json({ message: error?.message || 'Internal server error' });
   }
 };
 
