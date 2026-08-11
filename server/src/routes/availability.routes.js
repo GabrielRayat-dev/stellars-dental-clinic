@@ -1,14 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const availabilityModel = require('../models/availability.model');
+const validate = require('../middlewares/validate');
+const { availabilitySchemas } = require('../validation/schemas');
 
-router.get('/appointments/availability', async (req, res) => {
+router.get('/appointments/availability', validate(availabilitySchemas.month), async (req, res) => {
   try {
     const { month } = req.query;
-
-    if (!month || !/^\d{4}-\d{2}$/.test(month)) {
-      return res.status(400).json({ message: 'Invalid month format. Use YYYY-MM.' });
-    }
 
     const [yearStr, monthStr] = month.split('-');
     const year = parseInt(yearStr, 10);
@@ -28,13 +26,9 @@ router.get('/appointments/availability', async (req, res) => {
   }
 });
 
-router.get('/appointments/availability/:date', async (req, res) => {
+router.get('/appointments/availability/:date', validate(availabilitySchemas.date), async (req, res) => {
   try {
     const { date } = req.params;
-
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return res.status(400).json({ message: 'Invalid date format. Use YYYY-MM-DD.' });
-    }
 
     const data = await availabilityModel.getDailyAvailability(date);
     res.status(200).json({

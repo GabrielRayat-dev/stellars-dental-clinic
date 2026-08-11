@@ -258,7 +258,7 @@ const AdminUsers = () => {
                 <input className="au-input" type="email" name="email" value={form.email} onChange={handleField} required />
               </Field>
               <Field label="Password" required>
-                <input className="au-input" type="password" name="password" value={form.password} onChange={handleField} required />
+                <input className="au-input" type="password" name="password" minLength="8" value={form.password} onChange={handleField} required />
               </Field>
               <Field label="Role" required>
                 <select className="au-input au-select" name="role" value={form.role} onChange={handleField} required>

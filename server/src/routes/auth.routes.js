@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const { authenticate } = require('../middlewares/auth');
+const validate = require('../middlewares/validate');
+const { authSchemas } = require('../validation/schemas');
 const { login, changePassword, logout, getProfile, updateProfile, forgotPassword, resetPassword } = require('../controllers/auth.controller');
 
 // Specific rate limiters for sensitive auth routes
@@ -24,14 +26,14 @@ const resetPasswordLimiter = rateLimit({
 });
 
 // Public routes
-router.post('/login', loginLimiter, login);
-router.post('/forgot-password', forgotPasswordLimiter, forgotPassword);
-router.post('/reset-password', resetPasswordLimiter, resetPassword);
+router.post('/login', loginLimiter, validate(authSchemas.login), login);
+router.post('/forgot-password', forgotPasswordLimiter, validate(authSchemas.forgotPassword), forgotPassword);
+router.post('/reset-password', resetPasswordLimiter, validate(authSchemas.resetPassword), resetPassword);
 
 // Protected routes
-router.post('/change-password', authenticate, changePassword);
+router.post('/change-password', authenticate, validate(authSchemas.changePassword), changePassword);
 router.post('/logout', authenticate, logout);
 router.get('/profile', authenticate, getProfile);
-router.put('/profile', authenticate, updateProfile);
+router.put('/profile', authenticate, validate(authSchemas.updateProfile), updateProfile);
 
 module.exports = router;

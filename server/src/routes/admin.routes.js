@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin.controller');
 const { authenticate, authorizeAdmin } = require('../middlewares/auth');
+const validate = require('../middlewares/validate');
+const { adminSchemas } = require('../validation/schemas');
 
 // All admin routes require authentication and admin role
 router.use(authenticate, authorizeAdmin);
@@ -10,16 +12,16 @@ router.use(authenticate, authorizeAdmin);
 router.get('/staff', adminController.getAllStaff);
 
 // Get single staff
-router.get('/staff/:id', adminController.getStaffById);
+router.get('/staff/:id', validate(adminSchemas.id), adminController.getStaffById);
 
 // Create staff
-router.post('/staff', adminController.createStaff);
+router.post('/staff', validate(adminSchemas.createStaff), adminController.createStaff);
 
 // Update staff
-router.put('/staff/:id', adminController.updateStaff);
+router.put('/staff/:id', validate(adminSchemas.updateStaff), adminController.updateStaff);
 
 // Delete staff
-router.delete('/staff/:id', adminController.deleteStaff);
+router.delete('/staff/:id', validate(adminSchemas.id), adminController.deleteStaff);
 
 
 // router.get('/audit-logs', adminController.getAuditLogs);
