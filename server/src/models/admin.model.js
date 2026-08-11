@@ -54,15 +54,20 @@ const createStaff = async (email, password, profileData) => {
   // Strip out status from profileData — new accounts always start as logged_out
   const { status, ...safeProfileData } = profileData;
 
+  // Upsert the profile: some databases auto-create a profile row via trigger
+  // (update), others don't (insert). Upserting handles both cases.
   const { data, error } = await supabaseAdmin
     .from('profiles')
-    .update({
-      ...safeProfileData,
-      status: 'logged_out',
-      must_change_password: true,
-      updated_at: new Date(),
-    })
-    .eq('user_id', authData.user.id)
+    .upsert(
+      {
+        user_id: authData.user.id,
+        ...safeProfileData,
+        status: 'logged_out',
+        must_change_password: true,
+        updated_at: new Date(),
+      },
+      { onConflict: 'user_id' }
+    )
     .select()
     .single();
 
